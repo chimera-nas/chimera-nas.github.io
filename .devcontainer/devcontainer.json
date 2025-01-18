@@ -1,0 +1,20 @@
+{
+        "name": "site",
+        "build": {
+                "dockerfile": "Dockerfile"
+        },
+        "customizations": {
+                "vscode": {
+                        "settings": {},
+                        "extensions": []
+                }
+        },
+        "mounts": [
+                "source=site-build,target=/build,type=volume"
+        ],
+        "appPort": [],
+        "forwardPorts": [],
+        "privileged": true,
+        "workspaceMount": "source=${localWorkspaceFolder},target=/site,type=bind",
+        "workspaceFolder": "/site"
+}
