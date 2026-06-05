@@ -575,10 +575,10 @@
   <div class="warning" style="border-color:color-mix(in oklab, var(--accent) 30%, var(--border));background:color-mix(in oklab, var(--accent) 5%, var(--bg))">
     <div class="lab" style="color:var(--accent)">// how to read these numbers</div>
     <p>CI gates on every test it runs, so the honest claim is <b>"everything we wire up
-    passes."</b> But two different things are being measured. <b>smbtorture</b> and
-    <b>KVM pNFS</b> register their <em>entire</em> external conformance surface and then
-    explicitly disable what doesn't pass — so their percentages are a true fraction of a
-    real-world surface. Every other suite registers <em>only</em> the cases it expects to
+    passes."</b> But two different things are being measured. <b>smbtorture</b>,
+    <b>WPTS</b>, and <b>KVM pNFS</b> register their <em>entire</em> external conformance
+    surface and then explicitly disable what doesn't pass — so their percentages are a true
+    fraction of a real-world surface. Every other suite registers <em>only</em> the cases it expects to
     pass, so a 100% there means <b>"100% of what we chose to wire up,"</b> not 100% of the
     protocol. Both are marked below.</p>
   </div>
@@ -640,9 +640,9 @@
     </div>
     <div class="test-row">
       <div class="suite">WPTS</div>
-      <div class="what">Microsoft MS-SMB2 server conformance (.NET) — base plus persistent-handle cases.</div>
-      <div class="reg">63</div>
-      <div class="pass"><b>100%</b><span class="star"> *</span></div>
+      <div class="what">Microsoft MS-SMB2 server conformance (.NET) — the full suite across all 5 capability modes (base, persistent, compression, multichannel, encryption), with feature-N/A and non-passing cases disabled. Daemon stays crash-free in every mode.</div>
+      <div class="reg">267</div>
+      <div class="pass meaningful"><b>57.3%</b></div>
     </div>
     <div class="test-row">
       <div class="suite">S3 (boto3)</div>
