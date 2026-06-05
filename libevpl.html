@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Architecture · libevpl · chimeraproject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@300;400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+<style>
+.page-hero {
+  padding: 64px 0 24px;
+  border-top: 0;
+}
+.page-hero .kicker { color: var(--accent); }
+.page-hero h1 {
+  font-family: var(--font-serif); font-weight: 300;
+  font-size: clamp(36px, 4.6vw, 54px);
+  line-height: 1.05; letter-spacing: -0.02em;
+  max-width: 22ch; margin: 14px 0 18px;
+}
+.page-hero h1 em { font-style: italic; color: var(--accent); }
+.page-hero .lede {
+  font-family: var(--font-mono); font-size: 14px;
+  color: var(--fg-soft); line-height: 1.7;
+  max-width: 64ch;
+}
+
+.layout {
+  display: grid; grid-template-columns: 220px 1fr; gap: 56px;
+  align-items: start;
+  padding: 0 0 96px;
+}
+.toc {
+  position: sticky; top: 72px;
+  font-family: var(--font-mono); font-size: 12px;
+}
+.toc .label {
+  text-transform: uppercase; letter-spacing: 0.14em;
+  color: var(--muted); margin-bottom: 10px; font-size: 11px;
+}
+.toc a {
+  display: block;
+  padding: 6px 10px 6px 12px;
+  color: var(--fg-soft); text-decoration: none;
+  border-left: 2px solid var(--border);
+  line-height: 1.3;
+}
+.toc a:hover, .toc a.active {
+  color: var(--accent); border-left-color: var(--accent);
+}
+.toc .num { color: var(--muted); margin-right: 6px; }
+.toc .api {
+  margin-top: 20px; padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.toc .api a {
+  border-left-color: transparent;
+  padding-left: 0;
+  color: var(--muted);
+}
+.toc .api a:hover { color: var(--accent); }
+
+.article { max-width: 760px; }
+.article section { padding: 56px 0 0; border-top: 0; }
+.article section + section { margin-top: 12px; }
+.article h2 {
+  font-family: var(--font-serif); font-size: 30px;
+  margin-bottom: 8px; font-weight: 400;
+}
+.article h2 .num {
+  display: block;
+  font-family: var(--font-mono); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.16em;
+  color: var(--accent); margin-bottom: 10px;
+  font-weight: 500;
+}
+.article h3 {
+  margin-top: 32px; font-size: 18px;
+  font-family: var(--font-serif); font-weight: 400;
+}
+.article p { font-family: var(--font-mono); font-size: 14px; color: var(--fg-soft); margin-top: 14px; line-height: 1.7; }
+.article p strong { color: var(--fg); font-weight: 500; }
+.article ul, .article ol { padding-left: 18px; color: var(--fg-soft); font-family: var(--font-mono); font-size: 14px; line-height: 1.7; }
+.article ul li, .article ol li { margin: 6px 0; }
+.article a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); }
+
+.compare2 {
+  display: grid; grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--border); border-radius: 6px;
+  overflow: hidden;
+  margin-top: 24px;
+  gap: 1px; background: var(--border);
+}
+.compare2 .col { background: var(--bg); padding: 20px 22px; }
+.compare2 h4 {
+  font-family: var(--font-mono); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.14em;
+  color: var(--muted); margin-bottom: 10px;
+}
+.compare2 .col.event h4 { color: var(--fg); }
+.compare2 .col.poll h4  { color: var(--accent); }
+.compare2 ul { padding-left: 16px; }
+.compare2 li { font-size: 13px; color: var(--fg-soft); margin: 4px 0; }
+.compare2 li b { color: var(--fg); font-weight: 500; }
+
+.callout {
+  margin-top: 22px;
+  padding: 18px 22px;
+  border-left: 2px solid var(--accent);
+  background: color-mix(in oklab, var(--accent) 6%, var(--bg));
+}
+.callout p {
+  font-family: var(--font-serif); font-style: italic;
+  font-size: 15px; color: var(--fg);
+  margin: 0;
+}
+
+.diagram {
+  margin: 22px 0 8px;
+  border: 1px solid var(--border); border-radius: 6px;
+  background: var(--surface);
+  padding: 22px;
+  font-family: var(--font-mono); font-size: 12px;
+}
+.diagram .stage {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 10px; align-items: stretch;
+}
+.diagram .stage > .box {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 3px; padding: 12px;
+}
+.diagram .box .t { color: var(--fg); }
+.diagram .box .s { color: var(--muted); font-size: 11px; margin-top: 4px; }
+.diagram .arrow {
+  height: 28px;
+  margin: 8px 0;
+  display: grid; place-items: center;
+  color: var(--subtle);
+}
+.diagram .arrow .glyph {
+  font-family: var(--font-mono); color: var(--muted); font-size: 11px;
+}
+.diagram .single {
+  background: var(--bg); border: 1px solid var(--border-strong);
+  border-radius: 3px; padding: 14px; text-align: center;
+}
+.diagram .single.accent {
+  border-color: var(--accent);
+  background: color-mix(in oklab, var(--accent) 10%, var(--bg));
+}
+.diagram .single .t { color: var(--fg); font-weight: 500; }
+.diagram .single.accent .t { color: var(--accent); }
+.diagram .single .s { color: var(--muted); font-size: 11px; margin-top: 4px; }
+
+/* Tabbed back-ends */
+.bendtabs {
+  margin-top: 22px;
+  border: 1px solid var(--border); border-radius: 6px;
+  overflow: hidden;
+}
+.bendtabs .row {
+  display: grid; grid-template-columns: 160px 1fr;
+  border-bottom: 1px solid var(--border);
+}
+.bendtabs .row:last-child { border-bottom: 0; }
+.bendtabs .row .name {
+  background: var(--surface);
+  padding: 14px 18px;
+  font-family: var(--font-mono);
+  color: var(--accent); font-size: 13px;
+  border-right: 1px solid var(--border);
+}
+.bendtabs .row .desc {
+  padding: 14px 18px;
+  font-family: var(--font-mono); font-size: 13px;
+  color: var(--fg-soft); line-height: 1.6;
+}
+.bendtabs .row .desc b { color: var(--fg); font-weight: 500; }
+
+.princ {
+  margin-top: 28px;
+  border: 1px solid var(--border); border-radius: 6px;
+  overflow: hidden;
+}
+.princ .pr {
+  display: grid; grid-template-columns: 80px 1fr;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  align-items: baseline;
+}
+.princ .pr:last-child { border-bottom: 0; }
+.princ .pr .n {
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.12em;
+}
+.princ .pr .t {
+  font-family: var(--font-serif); font-size: 16px; color: var(--fg);
+  margin-bottom: 4px;
+}
+.princ .pr .s {
+  font-family: var(--font-mono); font-size: 13px;
+  color: var(--fg-soft); line-height: 1.6;
+}
+
+.footnotes {
+  margin-top: 64px; padding-top: 24px;
+  border-top: 1px solid var(--border);
+  font-family: var(--font-mono); font-size: 12px; color: var(--muted);
+}
+.footnotes h4 {
+  font-family: var(--font-mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 12px;
+}
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .toc { position: static; }
+  .compare2, .diagram .stage { grid-template-columns: 1fr; }
+  .bendtabs .row, .princ .pr { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="shell topbar-inner">
+    <a class="brand" href="libevpl.html">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 22 22" fill="none">
+          <path d="M3 11 L11 3 L19 11 L11 19 Z" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M7 11 L11 7 L15 11 L11 15 Z" fill="currentColor" opacity="0.85"/>
+        </svg>
+      </span>
+      chimeraproject
+    </a>
+    <div class="proj-tabs">
+      <a class="proj-tab" href="chimera.html">chimera</a>
+      <a class="proj-tab active" href="libevpl.html">libevpl</a>
+    </div>
+    <nav class="nav">
+      <a class="current" href="libevpl.html">Architecture</a>
+      <a href="libevpl-performance.html">Performance</a>
+      <a href="libevpl-build.html">Build</a>
+      <a href="/libevpl" target="_blank" rel="noopener">Docs&nbsp;↗</a>
+      <a class="gh" href="https://github.com/chimera-nas/libevpl" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        GitHub
+      </a>
+      <a class="gh" href="https://discord.gg/hnRkvQFecq" target="_blank" rel="noopener" title="Discord"><svg viewBox="0 -28.5 256 256" fill="currentColor" aria-hidden="true" style="width:14px;height:14px"><path d="M216.856 16.597A208.502 208.502 0 0 0 164.042 0c-2.275 4.113-4.933 9.645-6.766 14.046-19.692-2.961-39.203-2.961-58.533 0-1.832-4.4-4.55-9.933-6.846-14.046a207.809 207.809 0 0 0-52.855 16.638C5.618 67.147-3.443 116.4 1.087 164.956c22.169 16.555 43.653 26.612 64.775 33.193A161.094 161.094 0 0 0 79.735 175.3a136.413 136.413 0 0 1-21.846-10.632 108.636 108.636 0 0 0 5.355-4.237c42.122 19.702 87.89 19.702 129.51 0a131.66 131.66 0 0 0 5.355 4.237 136.07 136.07 0 0 1-21.886 10.653c4.006 8.02 8.638 15.67 13.873 22.848 21.142-6.58 42.646-16.637 64.815-33.213 5.316-56.288-9.08-105.09-38.056-148.36ZM85.474 135.095c-12.645 0-23.015-11.805-23.015-26.18s10.149-26.2 23.015-26.2c12.867 0 23.236 11.804 23.015 26.2.02 14.375-10.148 26.18-23.015 26.18Zm85.051 0c-12.645 0-23.014-11.805-23.014-26.18s10.148-26.2 23.014-26.2c12.867 0 23.236 11.804 23.015 26.2 0 14.375-10.148 26.18-23.015 26.18Z"/></svg>Discord</a>
+    </nav>
+  </div>
+</header>
+
+<section class="page-hero">
+  <div class="shell">
+    <span class="kicker">architecture · §</span>
+    <h1>Architecture</h1>
+    <p class="lede">
+      How libevpl is put together: the event-driven model, the hybrid event/poll loop,
+      registered memory and zero-copy I/O, the listener-attachment model for steering
+      connections, the backends, and the threading model that keeps the hot path
+      lock-free.
+    </p>
+  </div>
+</section>
+
+<div class="shell layout">
+  <aside class="toc" aria-label="Sections">
+    <div class="label">on this page</div>
+    <a href="#model"><span class="num">01</span>Event-driven model</a>
+    <a href="#loop"><span class="num">02</span>The event loop</a>
+    <a href="#hybrid"><span class="num">03</span>Hybrid event &amp; poll</a>
+    <a href="#memory"><span class="num">04</span>Memory &amp; zero-copy</a>
+    <a href="#backends"><span class="num">05</span>Protocol backends</a>
+    <a href="#steering"><span class="num">06</span>Connections &amp; steering</a>
+    <a href="#primitives"><span class="num">07</span>Timers · deferrals · doorbells</a>
+    <a href="#block"><span class="num">08</span>Block I/O integration</a>
+    <a href="#threading"><span class="num">09</span>Threading model</a>
+    <a href="#principles"><span class="num">10</span>Design principles</a>
+    <div class="api">
+      <div class="label" style="margin-bottom:8px">api reference ↗</div>
+      <a href="https://chimeraproject.io/libevpl/api/core" target="_blank" rel="noopener">Core</a>
+      <a href="https://chimeraproject.io/libevpl/api/binds" target="_blank" rel="noopener">Binds</a>
+      <a href="https://chimeraproject.io/libevpl/api/memory" target="_blank" rel="noopener">Memory</a>
+      <a href="https://chimeraproject.io/libevpl/api/threading" target="_blank" rel="noopener">Threading</a>
+      <a href="https://chimeraproject.io/libevpl/api/protocols" target="_blank" rel="noopener">Protocols</a>
+    </div>
+  </aside>
+
+  <article class="article">
+
+    <section id="model">
+      <h2><span class="num">§ 01</span>The event-driven model</h2>
+      <p>
+        In event-driven programming, application logic is structured as a collection of
+        callback functions that execute in response to events: a new connection arrives,
+        data becomes available on a socket, a write completes, a timer expires, another
+        thread signals work to be done.
+      </p>
+      <p>
+        Rather than blocking threads waiting for I/O to complete, applications register
+        callbacks with an event loop. The loop monitors many I/O sources simultaneously
+        and invokes the right callback as each event occurs. A single thread efficiently
+        handles thousands of concurrent connections without the memory overhead or context
+        switching costs of thread-per-connection.
+      </p>
+      <div class="callout">
+        <p>libevpl uses this model throughout, including for block I/O. Everything is asynchronous; nothing in the API blocks the loop.</p>
+      </div>
+    </section>
+
+    <section id="loop">
+      <h2><span class="num">§ 02</span>The event loop</h2>
+      <p>
+        The core of libevpl is the event loop, represented by <code>struct evpl</code>, which
+        manages all asynchronous operations within a single thread. <strong>Each thread that
+        performs I/O runs its own independent event loop.</strong> Within it, the application:
+      </p>
+      <ol>
+        <li>Initiates asynchronous operations (connect, send, receive, timer creation).</li>
+        <li>Registers callbacks invoked on completion.</li>
+        <li>Runs the loop, which repeatedly checks for completed events and dispatches.</li>
+        <li>All application logic executes inside those callbacks.</li>
+      </ol>
+      <p>
+        This eliminates locking on per-connection state — all operations on a given
+        connection happen sequentially in the same thread. Applications can maintain complex
+        state machines without worrying about concurrent access.
+      </p>
+      <p style="margin-top:14px">→ See the <a href="https://chimeraproject.io/libevpl/api/core" target="_blank" rel="noopener">Core API</a> for loop creation and management.</p>
+    </section>
+
+    <section id="hybrid">
+      <h2><span class="num">§ 03</span>Hybrid event &amp; poll modes</h2>
+      <p>
+        A fundamental challenge in high-performance I/O is choosing between two competing
+        approaches for detecting completions: <strong>system-call event notification</strong> and
+        <strong>busy polling</strong>.
+      </p>
+
+      <div class="compare2">
+        <div class="col event">
+          <h4>// epoll · kqueue · ...</h4>
+          <ul>
+            <li><b>How:</b> register interest, sleep in a wait syscall, kernel wakes the thread.</li>
+            <li><b>Wins:</b> energy efficient — sleeping threads consume nothing.</li>
+            <li><b>Wins:</b> scales to thousands of idle connections.</li>
+            <li><b>Costs:</b> context switch per wakeup; scheduling latency; syscall overhead per wait.</li>
+            <li><b>Costs:</b> events accumulate while the thread sleeps.</li>
+          </ul>
+        </div>
+        <div class="col poll">
+          <h4>// busy polling</h4>
+          <ul>
+            <li><b>How:</b> tight loop reading hardware completion queues; no syscalls.</li>
+            <li><b>Wins:</b> completion visible to userspace within nanoseconds.</li>
+            <li><b>Wins:</b> no context switches; no scheduler latency.</li>
+            <li><b>Costs:</b> 100% of a core, even when idle.</li>
+            <li><b>Costs:</b> scalability bounded by core count.</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>libevpl’s hybrid approach</h3>
+      <p>
+        libevpl combines both, switching between them based on load. The name is a
+        contraction of <i>event</i> and <i>poll</i>.
+      </p>
+      <ul>
+        <li><b>Light load:</b> the loop waits in a syscall; threads sleep and use little CPU.</li>
+        <li><b>Heavy load:</b> work is consistently available, so the loop switches to polling completion queues directly, and latency drops to near-hardware levels.</li>
+        <li>The transition is automatic, and the thresholds are configurable.</li>
+      </ul>
+    </section>
+
+    <section id="memory">
+      <h2><span class="num">§ 04</span>Memory registration &amp; zero-copy I/O</h2>
+      <p>
+        High-performance backends like RDMA and VFIO require <strong>memory
+        registration</strong>, which lets hardware access application memory directly
+        without kernel involvement. It’s worth understanding before using libevpl.
+      </p>
+
+      <h3>Why registration exists</h3>
+      <p>
+        Kernel-based I/O usually copies data between userspace and kernel buffers. Kernel
+        bypass removes those copies, but raises a question: how does the hardware safely
+        reach virtual memory that may be paged out, moved, or freed? Memory registration:
+      </p>
+      <ul>
+        <li>Pins pages so they can’t be swapped or relocated.</li>
+        <li>Creates DMA mappings translating virtual to physical for the device.</li>
+        <li>Tracks per-region permissions for DMA access.</li>
+        <li>Programs the IOMMU when present.</li>
+      </ul>
+
+      <h3>The cost, and the fix</h3>
+      <p>
+        A registration takes hundreds of microseconds, far longer than the I/O it enables
+        at 400&nbsp;Gbps, so registering per-operation would be too expensive. libevpl keeps
+        <strong>pools of pre-registered memory</strong>: large buffers registered once at
+        startup, from which applications take chunks for I/O and return them after
+        completion. The registration cost is paid once, not on the hot path.
+      </p>
+
+      <h3>Zero-copy in practice</h3>
+      <p>Sending data:</p>
+      <ol>
+        <li>Application allocates a buffer from libevpl’s pre-registered pool.</li>
+        <li>Fills the buffer; submits for transmission.</li>
+        <li>Hardware reads directly from the buffer via DMA.</li>
+        <li>Buffer returns to the pool on completion.</li>
+      </ol>
+      <p>Receiving works the same way: buffers are pre-posted to the hardware, which DMAs incoming data into them. No copies between hardware and application.</p>
+      <p>
+        For kernel-socket backends that don’t require registration, libevpl still uses the
+        same pool mechanism for consistency. Application code does not branch on backend.
+      </p>
+      <p style="margin-top:14px">→ See the <a href="https://chimeraproject.io/libevpl/api/memory" target="_blank" rel="noopener">Memory Management API</a>.</p>
+    </section>
+
+    <section id="backends">
+      <h2><span class="num">§ 05</span>Protocol backends</h2>
+      <p>
+        libevpl exposes a transport-agnostic API. At <b>bind</b> time the application names
+        a transport, usually from a config file or CLI flag rather than hardcoded. The
+        application logic doesn’t need per-backend changes: the same C written against
+        kernel sockets compiles and runs against io_uring or RDMA. Switching backends is a
+        deployment change, not a code change — though it is still a deliberate choice,
+        because each backend has its own requirements (RDMA needs the other side to speak
+        RDMA, XLIO wants a Mellanox NIC, VFIO needs an IOMMU, and so on).
+      </p>
+      <div class="bendtabs">
+        <div class="row"><div class="name">kernel sockets</div><div class="desc"><b>TCP/UDP via BSD sockets.</b> Works everywhere; the baseline against which everything else is measured.</div></div>
+        <div class="row"><div class="name">io_uring</div><div class="desc"><b>Modern Linux async I/O.</b> Drives both kernel sockets and block devices — the same submission/completion queues, the same buffer pools.</div></div>
+        <div class="row"><div class="name">nvidia xlio</div><div class="desc"><b>Userspace TCP for Mellanox NICs.</b> Same socket-like surface, hardware-accelerated TCP/IP. Drop-in for sockets when the NIC supports it.</div></div>
+        <div class="row"><div class="name">rdma cm</div><div class="desc"><b>Reliable Connection &amp; Unreliable Datagram QPs over RoCE v2.</b> Zero-copy and kernel-bypass, for when latency matters.</div></div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin-top:14px">// more backends over time; open an issue if you want one.</p>
+      <p style="margin-top:8px">→ See the <a href="https://chimeraproject.io/libevpl/api/binds" target="_blank" rel="noopener">Bind API</a> for protocol selection.</p>
+    </section>
+
+    <section id="steering">
+      <h2><span class="num">§ 06</span>Connection management &amp; steering</h2>
+      <p>
+        In a multi-threaded server, spreading incoming connections across threads matters
+        for load balancing and NUMA placement. libevpl handles this explicitly, through a
+        <strong>listener attachment model</strong>:
+      </p>
+      <ol>
+        <li>A listener (<code>struct evpl_listener</code>) is created to accept connections.</li>
+        <li>Individual worker threads explicitly <b>attach</b> to the listener.</li>
+        <li>When a connection arrives, libevpl selects one of the attached threads.</li>
+        <li>The connection is accepted directly into that thread’s event loop.</li>
+        <li>All I/O for the connection happens in the same thread, forever.</li>
+      </ol>
+
+      <h3>Why this matters</h3>
+      <ul>
+        <li><b>Placement control:</b> threads on a NUMA node attach to a listener whose connections will touch memory on that node.</li>
+        <li><b>Load balancing:</b> libevpl can steer by current load (today round-robin; smarter policies planned).</li>
+        <li><b>Flexibility:</b> different listeners can have different attachment policies; specialized threads can take specialized listeners.</li>
+        <li><b>No socket sharing:</b> unlike <code>SO_REUSEPORT</code>, libevpl owns visibility into which threads are busy. It also enables load balancing on backends that <i>don’t</i> support <code>SO_REUSEPORT</code> (or any equivalent).</li>
+      </ul>
+      <p>
+        This matters most for RDMA, where the hardware resources (queue pairs) sit close to
+        specific CPU cores and memory domains.
+      </p>
+    </section>
+
+    <section id="primitives">
+      <h2><span class="num">§ 07</span>Timers · deferrals · doorbells</h2>
+      <p>Three primitives for embedding application logic into the event-driven context.</p>
+      <h3>Timers</h3>
+      <p>Periodic by default; the callback removes itself if a one-shot is needed. Microsecond precision (subject to system timer resolution and loop load). Uses: keepalives, timeouts, periodic stats, background maintenance.</p>
+      <h3>Deferrals</h3>
+      <p>Schedule work to run at the end of the current loop iteration. Same thread, no synchronization. Use them to break up long callbacks, flush batches, avoid deep recursion, or order logic after the current event burst.</p>
+      <h3>Doorbells</h3>
+      <p>Thread-safe cross-loop signaling. Thread A queues a work item and rings thread B’s doorbell; B’s loop wakes, whether it was sleeping in <code>epoll_wait</code> or polling, and its callback drains the queue. Higher overhead than deferrals because of the synchronization, so use it when you actually need to cross loops.</p>
+    </section>
+
+    <section id="block">
+      <h2><span class="num">§ 08</span>Block I/O integration</h2>
+      <p>
+        libevpl integrates block-device I/O into the same event loop that handles network
+        I/O. A storage server manages everything in one place: a read from disk, a write to
+        the wire, and a timer all wake the same loop.
+      </p>
+      <ol>
+        <li>Submit read/write requests asynchronously.</li>
+        <li>Continue processing network events.</li>
+        <li>When the block op completes, a callback fires.</li>
+      </ol>
+      <p>
+        Backends include <strong>io_uring</strong> (kernel-mediated async) and
+        <strong>VFIO-NVMe</strong> (direct userspace NVMe, lower latency and fewer copies).
+        Block buffers come from the same pre-registered pools as network buffers, so
+        zero-copy works end-to-end where the backend supports it.
+      </p>
+    </section>
+
+    <section id="threading">
+      <h2><span class="num">§ 09</span>Threading model</h2>
+      <p>libevpl follows a strict single-threaded event-loop model:</p>
+      <ul>
+        <li>Each I/O-performing thread runs <b>exactly one</b> event loop.</li>
+        <li>All operations on objects owned by that loop must occur in that thread.</li>
+        <li>Multiple threads run independent loops in parallel.</li>
+        <li>Cross-thread communication uses doorbells or other thread-safe mechanisms.</li>
+      </ul>
+      <p>
+        This is what eliminates fine-grained locking in the hot path. Each loop has
+        exclusive access to its state. Applications scale by adding loops, not by sharing
+        one.
+      </p>
+      <p style="margin-top:8px">→ See the <a href="https://chimeraproject.io/libevpl/api/threading" target="_blank" rel="noopener">Threading API</a>.</p>
+    </section>
+
+    <section id="principles">
+      <h2><span class="num">§ 10</span>Design principles</h2>
+      <div class="princ">
+        <div class="pr"><div class="n">01</div><div><div class="t">Asynchronous only</div><div class="s">All operations are non-blocking; completion arrives via callback. There is no blocking surface.</div></div></div>
+        <div class="pr"><div class="n">02</div><div><div class="t">Protocol agnostic</div><div class="s">A unified API across kernel sockets, io_uring, XLIO, RDMA, VFIO. The application doesn’t branch on backend.</div></div></div>
+        <div class="pr"><div class="n">03</div><div><div class="t">Zero-copy optimized</div><div class="s">Pre-registered memory pools enable direct hardware access end-to-end. Even backends that don’t require registration use the same pools.</div></div></div>
+        <div class="pr"><div class="n">04</div><div><div class="t">Hybrid event/poll</div><div class="s">Automatic transitions between sleeping in <code>epoll_wait</code> and polling completion queues, balancing energy and latency.</div></div></div>
+        <div class="pr"><div class="n">05</div><div><div class="t">Single-threaded event loops</div><div class="s">No locks in the hot path. Loops scale by being added, not by being shared.</div></div></div>
+        <div class="pr"><div class="n">06</div><div><div class="t">Explicit thread attachment</div><div class="s">Applications control connection steering for NUMA awareness; load balancing decisions are made by libevpl with full visibility.</div></div></div>
+      </div>
+      <p style="margin-top:24px">→ Next: <a href="libevpl-performance.html">Performance</a> · <a href="libevpl-build.html">Build &amp; install</a> · <a href="https://chimeraproject.io/libevpl/api" target="_blank" rel="noopener">API reference ↗</a></p>
+    </section>
+
+    <div class="footnotes">
+      // <i>libevpl is under active development; some interfaces may still change. Issues and patches welcome.</i>
+    </div>
+  </article>
+</div>
+
+<footer class="site-foot">
+  <div class="shell">
+    <div class="cols">
+      <div>
+        <a class="brand" href="libevpl.html" style="margin-bottom:12px">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 22 22" fill="none">
+              <path d="M3 11 L11 3 L19 11 L11 19 Z" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M7 11 L11 7 L15 11 L11 15 Z" fill="currentColor" opacity="0.85"/>
+            </svg>
+          </span>
+          chimeraproject
+        </a>
+        <p style="margin-top:14px;max-width:36ch">A single event-loop engine for high-performance network and block I/O.</p>
+      </div>
+      <div>
+        <h4>libevpl</h4>
+          <a href="libevpl.html">Architecture</a>
+        <a href="libevpl-performance.html">Performance</a>
+        <a href="libevpl-build.html">Build &amp; install</a>
+        
+      </div>
+      <div>
+        <h4>API reference</h4>
+        <a href="https://chimeraproject.io/libevpl/api" target="_blank" rel="noopener">API root ↗</a>
+        <a href="https://chimeraproject.io/libevpl/api/core" target="_blank" rel="noopener">Core ↗</a>
+        <a href="https://chimeraproject.io/libevpl/api/protocols" target="_blank" rel="noopener">Protocols ↗</a>
+        <a href="https://chimeraproject.io/libevpl/examples" target="_blank" rel="noopener">Examples ↗</a>
+      </div>
+      <div>
+        <h4>Source &amp; chat</h4>
+        <a href="https://github.com/chimera-nas/libevpl" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://discord.gg/hnRkvQFecq" target="_blank" rel="noopener">Discord</a>
+        <a href="chimera.html">chimera (the NAS stack)</a>
+      </div>
+    </div>
+    <div class="meta">
+      <span>License — LGPL-2.1</span>
+      <span>© 2026 the chimeraproject contributors</span>
+      <span style="margin-left:auto">API is not yet stable.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const links = document.querySelectorAll(".toc a[href^='#']");
+const sections = [...links].map(a => document.querySelector(a.getAttribute("href")));
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      links.forEach(l => l.classList.toggle("active", l.getAttribute("href") === "#" + id));
+    }
+  });
+}, { rootMargin: "-30% 0px -60% 0px" });
+sections.forEach(s => s && obs.observe(s));
+</script>
+</body>
+</html>

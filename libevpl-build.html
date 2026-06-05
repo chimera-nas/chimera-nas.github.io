@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Build &amp; install · libevpl · chimeraproject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@300;400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+<style>
+.page-hero { padding: 64px 0 16px; border-top: 0; }
+.page-hero h1 {
+  font-family: var(--font-serif); font-weight: 300;
+  font-size: clamp(36px, 4.6vw, 54px); line-height: 1.05;
+  letter-spacing: -0.02em; max-width: 22ch; margin: 14px 0 18px;
+}
+.page-hero h1 em { font-style: italic; color: var(--accent); }
+.page-hero .lede {
+  font-family: var(--font-mono); font-size: 14px;
+  color: var(--fg-soft); line-height: 1.7; max-width: 64ch;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 48px;
+  padding: 32px 0 96px;
+}
+.toc {
+  position: sticky; top: 72px;
+  font-family: var(--font-mono); font-size: 12px;
+  align-self: start;
+}
+.toc .label {
+  text-transform: uppercase; letter-spacing: 0.14em;
+  color: var(--muted); margin-bottom: 10px; font-size: 11px;
+}
+.toc a {
+  display: block; padding: 6px 0 6px 12px;
+  border-left: 2px solid var(--border);
+  color: var(--fg-soft); text-decoration: none;
+  line-height: 1.4;
+}
+.toc a:hover, .toc a.active { color: var(--accent); border-left-color: var(--accent); }
+.toc .num { color: var(--muted); margin-right: 6px; }
+
+.article { max-width: 720px; }
+.article section { padding: 32px 0 0; border-top: 0; }
+.article section + section { border-top: 1px solid var(--border); padding-top: 32px; margin-top: 32px; }
+.article h2 {
+  font-family: var(--font-serif); font-weight: 400;
+  font-size: 26px; margin-bottom: 8px;
+}
+.article h2 .num {
+  display: block;
+  font-family: var(--font-mono); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.14em;
+  color: var(--accent); margin-bottom: 8px;
+}
+.article h3 {
+  margin-top: 24px; font-size: 16px;
+  font-family: var(--font-mono); font-weight: 500;
+  color: var(--fg);
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.article p {
+  font-family: var(--font-mono); font-size: 14px;
+  color: var(--fg-soft); line-height: 1.7;
+  margin-top: 12px; max-width: 64ch;
+}
+.article p strong { color: var(--fg); font-weight: 500; }
+.article ul { padding-left: 18px; color: var(--fg-soft); font-family: var(--font-mono); font-size: 13px; line-height: 1.7; max-width: 64ch; }
+.article ul li { margin: 4px 0; }
+.article ul li b { color: var(--fg); font-weight: 500; }
+
+.shell-block {
+  margin-top: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.shell-block .hdr {
+  padding: 8px 14px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--font-mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.14em;
+  color: var(--muted);
+}
+.shell-block .hdr .copy {
+  background: transparent; border: 1px solid var(--border);
+  color: var(--muted); cursor: pointer;
+  font-family: var(--font-mono); font-size: 10px;
+  padding: 2px 8px; border-radius: 2px;
+}
+.shell-block .hdr .copy:hover { color: var(--accent); border-color: var(--accent); }
+.shell-block pre {
+  margin: 0; padding: 14px 16px;
+  font-family: var(--font-mono); font-size: 13px;
+  white-space: pre; overflow-x: auto;
+  color: var(--fg);
+  line-height: 1.55;
+}
+.shell-block .prompt { color: var(--muted); user-select: none; }
+.shell-block .out { color: var(--muted); }
+.shell-block .accent { color: var(--accent); }
+
+.deps {
+  margin-top: 14px;
+  border: 1px solid var(--border); border-radius: 4px;
+  overflow: hidden;
+}
+.deps .row {
+  display: grid; grid-template-columns: 160px 1fr 100px;
+  border-bottom: 1px solid var(--border);
+}
+.deps .row:last-child { border-bottom: 0; }
+.deps .row > div { padding: 12px 16px; }
+.deps .row.head {
+  background: var(--surface);
+  font-family: var(--font-mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.14em;
+  color: var(--muted);
+}
+.deps .name { font-family: var(--font-mono); color: var(--accent); font-size: 13px; }
+.deps .desc { font-family: var(--font-mono); color: var(--fg-soft); font-size: 13px; line-height: 1.5; }
+.deps .req { font-family: var(--font-mono); color: var(--muted); font-size: 11px; text-align: right; align-self: center; }
+.deps .req.required { color: var(--fg); }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .toc { position: static; }
+  .deps .row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="shell topbar-inner">
+    <a class="brand" href="libevpl.html">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 22 22" fill="none">
+          <path d="M3 11 L11 3 L19 11 L11 19 Z" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M7 11 L11 7 L15 11 L11 15 Z" fill="currentColor" opacity="0.85"/>
+        </svg>
+      </span>
+      chimeraproject
+    </a>
+    <div class="proj-tabs">
+      <a class="proj-tab" href="chimera.html">chimera</a>
+      <a class="proj-tab active" href="libevpl.html">libevpl</a>
+    </div>
+    <nav class="nav">
+      <a href="libevpl.html">Architecture</a>
+      <a href="libevpl-performance.html">Performance</a>
+      <a class="current" href="libevpl-build.html">Build</a>
+      <a href="/libevpl" target="_blank" rel="noopener">Docs&nbsp;↗</a>
+      <a class="gh" href="https://github.com/chimera-nas/libevpl" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        GitHub
+      </a>
+      <a class="gh" href="https://discord.gg/hnRkvQFecq" target="_blank" rel="noopener" title="Discord"><svg viewBox="0 -28.5 256 256" fill="currentColor" aria-hidden="true" style="width:14px;height:14px"><path d="M216.856 16.597A208.502 208.502 0 0 0 164.042 0c-2.275 4.113-4.933 9.645-6.766 14.046-19.692-2.961-39.203-2.961-58.533 0-1.832-4.4-4.55-9.933-6.846-14.046a207.809 207.809 0 0 0-52.855 16.638C5.618 67.147-3.443 116.4 1.087 164.956c22.169 16.555 43.653 26.612 64.775 33.193A161.094 161.094 0 0 0 79.735 175.3a136.413 136.413 0 0 1-21.846-10.632 108.636 108.636 0 0 0 5.355-4.237c42.122 19.702 87.89 19.702 129.51 0a131.66 131.66 0 0 0 5.355 4.237 136.07 136.07 0 0 1-21.886 10.653c4.006 8.02 8.638 15.67 13.873 22.848 21.142-6.58 42.646-16.637 64.815-33.213 5.316-56.288-9.08-105.09-38.056-148.36ZM85.474 135.095c-12.645 0-23.015-11.805-23.015-26.18s10.149-26.2 23.015-26.2c12.867 0 23.236 11.804 23.015 26.2.02 14.375-10.148 26.18-23.015 26.18Zm85.051 0c-12.645 0-23.014-11.805-23.014-26.18s10.148-26.2 23.014-26.2c12.867 0 23.236 11.804 23.015 26.2 0 14.375-10.148 26.18-23.015 26.18Z"/></svg>Discord</a>
+    </nav>
+  </div>
+</header>
+
+<section class="page-hero">
+  <div class="shell">
+    <span class="kicker">build &amp; install · §</span>
+    <h1>Build &amp; install</h1>
+    <p class="lede">
+      libevpl is a C library built with CMake. A minimal build needs only a working
+      compiler; the optional dependencies enable the acceleration backends. This page
+      covers the standard build, the optional pieces, and a smoke test to confirm the
+      install.
+    </p>
+  </div>
+</section>
+
+<div class="shell layout">
+  <aside class="toc">
+    <div class="label">on this page</div>
+    <a href="#req"><span class="num">01</span>Requirements</a>
+    <a href="#deps"><span class="num">02</span>Optional dependencies</a>
+    <a href="#get"><span class="num">03</span>Get the source</a>
+    <a href="#build"><span class="num">04</span>Configure &amp; build</a>
+    <a href="#flags"><span class="num">05</span>Build options</a>
+    <a href="#smoke"><span class="num">06</span>Smoke test</a>
+    <a href="#install"><span class="num">07</span>Install</a>
+    <a href="#link"><span class="num">08</span>Linking against libevpl</a>
+  </aside>
+
+  <article class="article">
+    <section id="req">
+      <h2><span class="num">§ 01</span>Requirements</h2>
+      <p>libevpl targets modern Linux. Other platforms are best-effort.</p>
+      <ul>
+        <li><b>OS:</b> Linux ≥ 5.10 recommended (io_uring needs a recent kernel).</li>
+        <li><b>Compiler:</b> GCC ≥ 11 or Clang ≥ 14 — C11 with GNU extensions.</li>
+        <li><b>Build system:</b> CMake ≥ 3.20.</li>
+        <li><b>Toolchain:</b> <code>pkg-config</code>, <code>git</code>, GNU make or Ninja.</li>
+      </ul>
+    </section>
+
+    <section id="deps">
+      <h2><span class="num">§ 02</span>Optional dependencies</h2>
+      <p>Each acceleration backend brings its own dependency. Missing libraries simply disable that backend at configure time.</p>
+      <div class="deps">
+        <div class="row head"><div>library</div><div>enables</div><div>status</div></div>
+        <div class="row"><div class="name">liburing</div><div class="desc">io_uring backend for sockets and block.</div><div class="req">recommended</div></div>
+        <div class="row"><div class="name">librdmacm + libibverbs</div><div class="desc">RDMA Connection Manager + verbs — RoCE v2 / IB.</div><div class="req">optional</div></div>
+        <div class="row"><div class="name">xlio</div><div class="desc">NVIDIA XLIO userspace TCP acceleration.</div><div class="req">optional</div></div>
+        <div class="row"><div class="name">libvfio-user</div><div class="desc">VFIO-NVMe direct userspace block I/O.</div><div class="req">optional</div></div>
+        <div class="row"><div class="name">openssl</div><div class="desc">TLS termination for stream protocols.</div><div class="req">optional</div></div>
+        <div class="row"><div class="name">libnuma</div><div class="desc">NUMA-aware buffer pool allocation.</div><div class="req required">required</div></div>
+      </div>
+
+      <h3>Distro install — Ubuntu / Debian</h3>
+      <div class="shell-block">
+        <div class="hdr"><span>$ shell</span></div>
+<pre><span class="prompt">$</span> sudo apt install -y build-essential cmake git pkg-config \
+       liburing-dev libnuma-dev \
+       librdmacm-dev libibverbs-dev rdma-core \
+       libssl-dev</pre>
+      </div>
+
+      <h3>Distro install — RHEL / Rocky / Fedora</h3>
+      <div class="shell-block">
+        <div class="hdr"><span>$ shell</span></div>
+<pre><span class="prompt">$</span> sudo dnf install -y gcc gcc-c++ cmake git pkgconfig \
+       liburing-devel numactl-devel \
+       librdmacm-devel libibverbs-devel rdma-core-devel \
+       openssl-devel</pre>
+      </div>
+    </section>
+
+    <section id="get">
+      <h2><span class="num">§ 03</span>Get the source</h2>
+      <div class="shell-block">
+        <div class="hdr"><span>$ shell</span></div>
+<pre><span class="prompt">$</span> git clone https://github.com/chimera-nas/libevpl.git
+<span class="prompt">$</span> cd libevpl
+<span class="prompt">$</span> git submodule update --init --recursive</pre>
+      </div>
+      <p>Releases are tagged in the same repository. Until 1.0, we recommend tracking <code>main</code> or pinning to a specific commit you’ve tested against.</p>
+    </section>
+
+    <section id="build">
+      <h2><span class="num">§ 04</span>Configure &amp; build</h2>
+      <p>Out-of-tree build, Release configuration:</p>
+      <div class="shell-block">
+        <div class="hdr"><span>$ shell</span></div>
+<pre><span class="prompt">$</span> cmake -S . -B build -GNinja \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DEVPL_RDMA=ON \
+        -DEVPL_IO_URING=ON
+<span class="prompt">$</span> cmake --build build -j
+<span class="out">[100%] Built target evpl</span>
+<span class="out">[100%] Built target echo_stream</span>
+<span class="out">[100%] Built target echo_message</span></pre>
+      </div>
+      <p>If you only need kernel sockets, you can disable every optional backend — the build still produces a useful library.</p>
+    </section>
+
+    <section id="flags">
+      <h2><span class="num">§ 05</span>Build options</h2>
+      <div class="deps">
+        <div class="row head"><div>option</div><div>effect</div><div>default</div></div>
+        <div class="row"><div class="name">EVPL_IO_URING</div><div class="desc">Build io_uring backend; requires <code>liburing</code>.</div><div class="req">ON</div></div>
+        <div class="row"><div class="name">EVPL_RDMA</div><div class="desc">Build RDMA CM backend.</div><div class="req">ON if libs found</div></div>
+        <div class="row"><div class="name">EVPL_XLIO</div><div class="desc">Build NVIDIA XLIO backend.</div><div class="req">OFF</div></div>
+        <div class="row"><div class="name">EVPL_VFIO_NVME</div><div class="desc">Build VFIO-NVMe block backend.</div><div class="req">OFF</div></div>
+        <div class="row"><div class="name">EVPL_TLS</div><div class="desc">TLS stream support via OpenSSL.</div><div class="req">ON if found</div></div>
+        <div class="row"><div class="name">EVPL_BUILD_BENCH</div><div class="desc">Build the benchmark harnesses under <code>bench/</code>.</div><div class="req">ON</div></div>
+        <div class="row"><div class="name">EVPL_BUILD_TESTS</div><div class="desc">Build the test suite.</div><div class="req">ON</div></div>
+        <div class="row"><div class="name">CMAKE_BUILD_TYPE</div><div class="desc">Release / Debug / RelWithDebInfo.</div><div class="req">Release</div></div>
+      </div>
+    </section>
+
+    <section id="smoke">
+      <h2><span class="num">§ 06</span>Smoke test</h2>
+      <p>Two echo servers and a self-test exercise the loop, the buffer pool, and the bind layer:</p>
+      <div class="shell-block">
+        <div class="hdr"><span>$ shell</span></div>
+<pre><span class="prompt">$</span> ./build/test/evpl_unit
+<span class="out">[ OK ] evpl.loop.create_destroy</span>
+<span class="out">[ OK ] evpl.buffer.pool_roundtrip</span>
+<span class="out">[ OK ] evpl.timer.periodic</span>
+<span class="out">[ OK ] evpl.doorbell.cross_thread</span>
+<span class="accent">[ OK ] all tests passed</span>
+
+<span class="prompt">$</span> ./build/examples/echo_stream --listen 0.0.0.0:9000 &
+<span class="prompt">$</span> ./build/examples/echo_stream --connect 127.0.0.1:9000 --rps 200000
+<span class="out">echo: rtt p50=14.1µs  p99=27.3µs  rps=199942</span></pre>
+      </div>
+      <p>Switching the backend doesn’t change the example code — pass <code>--backend io_uring</code> or <code>--backend rdma</code> to either binary, given the dependencies are present.</p>
+    </section>
+
+    <section id="install">
+      <h2><span class="num">§ 07</span>Install</h2>
+      <div class="shell-block">
+        <div class="hdr"><span>$ shell</span></div>
+<pre><span class="prompt">$</span> sudo cmake --install build --prefix /usr/local
+<span class="out">-- Installing: /usr/local/lib/libevpl.so</span>
+<span class="out">-- Installing: /usr/local/include/evpl/evpl.h</span>
+<span class="out">-- Installing: /usr/local/lib/pkgconfig/evpl.pc</span></pre>
+      </div>
+      <p>The install lays down a <code>pkg-config</code> file. Most build systems can find libevpl with no further hints.</p>
+    </section>
+
+    <section id="link">
+      <h2><span class="num">§ 08</span>Linking against libevpl</h2>
+      <p>Minimal CMake consumer:</p>
+      <div class="shell-block">
+        <div class="hdr"><span>CMakeLists.txt</span></div>
+<pre>find_package(PkgConfig REQUIRED)
+pkg_check_modules(EVPL REQUIRED evpl)
+
+add_executable(myserver main.c)
+target_include_directories(myserver PRIVATE <span class="accent">${EVPL_INCLUDE_DIRS}</span>)
+target_link_libraries(myserver PRIVATE <span class="accent">${EVPL_LIBRARIES}</span>)</pre>
+      </div>
+      <p>Or plainly:</p>
+      <div class="shell-block">
+        <div class="hdr"><span>$ shell</span></div>
+<pre><span class="prompt">$</span> cc main.c -o myserver $(pkg-config --cflags --libs evpl)</pre>
+      </div>
+      <p>From here, head to the <a href="https://chimeraproject.io/libevpl/api" target="_blank" rel="noopener">API reference ↗</a> or read <a href="libevpl.html">the architecture</a> for context.</p>
+    </section>
+  </article>
+</div>
+
+<footer class="site-foot">
+  <div class="shell">
+    <div class="cols">
+      <div>
+        <a class="brand" href="libevpl.html" style="margin-bottom:12px">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 22 22" fill="none">
+              <path d="M3 11 L11 3 L19 11 L11 19 Z" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M7 11 L11 7 L15 11 L11 15 Z" fill="currentColor" opacity="0.85"/>
+            </svg>
+          </span>
+          chimeraproject
+        </a>
+        <p style="margin-top:14px;max-width:36ch">A single event-loop engine for high-performance network and block I/O.</p>
+      </div>
+      <div>
+        <h4>libevpl</h4>
+          <a href="libevpl.html">Architecture</a>
+        <a href="libevpl-performance.html">Performance</a>
+        <a href="libevpl-build.html">Build &amp; install</a>
+        
+      </div>
+      <div>
+        <h4>API reference</h4>
+        <a href="https://chimeraproject.io/libevpl/api" target="_blank" rel="noopener">API root ↗</a>
+        <a href="https://chimeraproject.io/libevpl/api/core" target="_blank" rel="noopener">Core ↗</a>
+        <a href="https://chimeraproject.io/libevpl/examples" target="_blank" rel="noopener">Examples ↗</a>
+      </div>
+      <div>
+        <h4>Source &amp; chat</h4>
+        <a href="https://github.com/chimera-nas/libevpl" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://discord.gg/hnRkvQFecq" target="_blank" rel="noopener">Discord</a>
+        <a href="chimera.html">chimera (the NAS stack)</a>
+      </div>
+    </div>
+    <div class="meta">
+      <span>License — LGPL-2.1</span>
+      <span>© 2026 the chimeraproject contributors</span>
+      <span style="margin-left:auto">API is not yet stable.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const links = document.querySelectorAll(".toc a[href^='#']");
+const sections = [...links].map(a => document.querySelector(a.getAttribute("href")));
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      links.forEach(l => l.classList.toggle("active", l.getAttribute("href") === "#" + id));
+    }
+  });
+}, { rootMargin: "-30% 0px -60% 0px" });
+sections.forEach(s => s && obs.observe(s));
+</script>
+</body>
+</html>

@@ -1,0 +1,782 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Status &amp; conformance — Chimera</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@300;400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+<style>
+.page-hero { padding: 72px 0 24px; border-top: 0; }
+.page-hero h1 { font-size: clamp(40px, 5vw, 60px); margin: 16px 0 20px; max-width: 22ch; }
+.page-hero h1 em { font-style: italic; color: var(--accent); }
+.page-hero .lede {
+  max-width: 68ch; font-size: 16px; color: var(--fg-soft);
+  font-family: var(--font-mono); line-height: 1.7;
+}
+.page-hero .meta-row {
+  display: flex; gap: 24px; flex-wrap: wrap; margin-top: 24px;
+  font-family: var(--font-mono); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted);
+}
+.page-hero .meta-row b { color: var(--fg); font-weight: 500; }
+
+/* Overview status cards */
+.statusgrid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px;
+  background: var(--border); border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden;
+  margin-top: 8px;
+}
+.scard {
+  background: var(--bg); padding: 22px 24px;
+}
+.scard .top {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin-bottom: 10px;
+}
+.scard .name { font-family: var(--font-serif); font-size: 22px; }
+.scard .badge {
+  font-family: var(--font-mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  padding: 3px 9px; border-radius: 2px;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.scard .badge .led { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.badge.mature { background: color-mix(in oklab, var(--good) 14%, var(--bg)); color: var(--good); }
+.badge.mature .led { background: var(--good); }
+.badge.broad { background: color-mix(in oklab, var(--accent) 14%, var(--bg)); color: var(--accent); }
+.badge.broad .led { background: var(--accent); }
+.badge.partial { background: color-mix(in oklab, var(--warn) 14%, var(--bg)); color: var(--warn); }
+.badge.partial .led { background: var(--warn); }
+.scard p {
+  font-family: var(--font-mono); font-size: 13px;
+  color: var(--fg-soft); line-height: 1.6; margin: 0;
+}
+
+/* Section titles */
+.section-title {
+  font-family: var(--font-mono); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.16em;
+  color: var(--accent);
+  margin: 64px 0 8px;
+  display: flex; align-items: center; gap: 12px;
+}
+.section-title .num { color: var(--muted); }
+.section-intro {
+  font-family: var(--font-mono); font-size: 14px; color: var(--fg-soft);
+  line-height: 1.7; max-width: 70ch; margin: 0 0 24px;
+}
+.section-intro b { color: var(--fg); font-weight: 500; }
+
+/* Protocol detail block */
+.proto {
+  border: 1px solid var(--border); border-radius: 8px;
+  overflow: hidden; margin-top: 20px;
+}
+.proto-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  flex-wrap: wrap;
+  padding: 18px 24px; background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.proto-head .l { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.proto-head .name { font-family: var(--font-serif); font-size: 24px; }
+.proto-head .tag {
+  font-family: var(--font-mono); font-size: 12px; color: var(--muted);
+}
+.proto-head .badge {
+  font-family: var(--font-mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  padding: 4px 10px; border-radius: 2px;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.proto-head .badge .led { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+
+.cols3 {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+}
+.col {
+  padding: 20px 22px; border-right: 1px solid var(--border);
+}
+.col:last-child { border-right: 0; }
+.col h4 {
+  font-family: var(--font-mono); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.col h4 .mark {
+  width: 14px; height: 14px; border-radius: 3px;
+  display: inline-grid; place-items: center;
+  font-size: 11px; line-height: 1; font-weight: 700;
+}
+.col.done h4 { color: var(--good); }
+.col.done .mark { background: color-mix(in oklab, var(--good) 20%, var(--bg)); color: var(--good); }
+.col.partial h4 { color: var(--warn); }
+.col.partial .mark { background: color-mix(in oklab, var(--warn) 20%, var(--bg)); color: var(--warn); }
+.col.missing h4 { color: var(--muted); }
+.col.missing .mark { background: var(--surface-2); color: var(--muted); }
+.col ul { list-style: none; margin: 0; padding: 0; }
+.col li {
+  font-family: var(--font-mono); font-size: 12.5px;
+  color: var(--fg-soft); line-height: 1.5;
+  padding: 6px 0 6px 16px; position: relative;
+}
+.col li::before {
+  content: ""; position: absolute; left: 0; top: 12px;
+  width: 6px; height: 1px; background: var(--border-strong);
+}
+.col li b { color: var(--fg); font-weight: 500; }
+.col li code {
+  font-size: 11px; background: var(--surface);
+  border: 1px solid var(--border); padding: 0 4px; border-radius: 2px;
+  color: var(--fg-soft);
+}
+
+/* Tests */
+.tests {
+  border: 1px solid var(--border); border-radius: 8px;
+  overflow: hidden; margin-top: 20px;
+}
+.test-row {
+  display: grid; grid-template-columns: 160px 1fr 96px 96px;
+  border-bottom: 1px solid var(--border);
+}
+.test-row:last-child { border-bottom: 0; }
+.test-row.head {
+  background: var(--surface);
+  font-family: var(--font-mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted);
+}
+.test-row > div { padding: 14px 18px; }
+.test-row .suite { font-family: var(--font-mono); font-size: 13px; color: var(--accent); }
+.test-row .what { font-family: var(--font-mono); font-size: 13px; color: var(--fg-soft); line-height: 1.55; }
+.test-row .reg { font-family: var(--font-mono); font-size: 13px; color: var(--fg-soft); align-self: center; }
+.test-row .pass { font-family: var(--font-mono); font-size: 13px; align-self: center; }
+.test-row .pass b { color: var(--good); font-weight: 500; }
+.test-row .pass .star { color: var(--muted); }
+.test-row .pass.meaningful b { color: var(--accent); }
+.test-row.head .reg, .test-row.head .pass { align-self: auto; color: var(--muted); }
+
+/* smbtorture backend breakdown */
+.bd {
+  margin-top: 20px;
+  border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+}
+.bd .bd-row {
+  display: grid; grid-template-columns: 1fr 90px 90px 96px;
+  border-bottom: 1px solid var(--border);
+}
+.bd .bd-row:last-child { border-bottom: 0; }
+.bd .bd-row.head {
+  background: var(--surface);
+  font-family: var(--font-mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted);
+}
+.bd .bd-row.total { background: color-mix(in oklab, var(--accent) 7%, var(--bg)); }
+.bd .bd-row > div { padding: 11px 18px; font-family: var(--font-mono); font-size: 13px; }
+.bd .bd-row .be { color: var(--fg); }
+.bd .bd-row.total .be { color: var(--accent); }
+.bd .bd-row .num { color: var(--fg-soft); }
+.bd .bd-row .pct { color: var(--fg); }
+.bd .bd-row.total .pct { color: var(--accent); font-weight: 500; }
+.bd .bd-bar {
+  position: relative; height: 16px; align-self: center;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 2px;
+  overflow: hidden; margin: 0 18px;
+}
+
+.bignum {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  margin-top: 8px;
+}
+.bignum .n {
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 22px 24px; background: var(--bg);
+}
+.bignum .n .v {
+  font-family: var(--font-serif); font-size: 34px; color: var(--accent);
+  font-weight: 300; line-height: 1;
+}
+.bignum .n .l {
+  font-family: var(--font-mono); font-size: 12px; color: var(--fg-soft);
+  margin-top: 10px; line-height: 1.5;
+}
+
+/* Backends strip */
+.backends {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;
+}
+.backends .be {
+  font-family: var(--font-mono); font-size: 12px;
+  padding: 6px 12px; border: 1px solid var(--border-strong);
+  border-radius: 3px; color: var(--fg-soft);
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.backends .be .led { width: 6px; height: 6px; border-radius: 50%; background: var(--good); display: inline-block; }
+
+/* Callouts */
+.warning {
+  margin: 24px 0;
+  padding: 22px 24px;
+  border: 1px solid color-mix(in oklab, var(--warn) 30%, var(--border));
+  background: color-mix(in oklab, var(--warn) 6%, var(--bg));
+  border-radius: 6px;
+}
+.warning .lab {
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--warn); text-transform: uppercase; letter-spacing: 0.14em;
+  margin-bottom: 8px;
+}
+.warning p {
+  font-family: var(--font-mono); font-size: 14px; line-height: 1.7;
+  color: var(--fg-soft); margin: 0; max-width: 72ch;
+}
+.warning p b { color: var(--fg); font-weight: 500; }
+.warning p + p { margin-top: 10px; }
+
+.ghnote {
+  margin-top: 28px;
+  font-family: var(--font-mono); font-size: 13px; color: var(--muted);
+  line-height: 1.6;
+}
+.ghnote a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); }
+
+@media (max-width: 860px) {
+  .statusgrid { grid-template-columns: 1fr; }
+  .cols3 { grid-template-columns: 1fr; }
+  .col { border-right: 0; border-bottom: 1px solid var(--border); }
+  .col:last-child { border-bottom: 0; }
+  .test-row { grid-template-columns: 1fr; gap: 2px; }
+  .test-row > div { padding: 8px 18px; }
+  .bd .bd-row { grid-template-columns: 1fr 70px 70px; }
+  .bd .bd-bar { display: none; }
+  .bignum { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="shell topbar-inner">
+    <a class="brand" href="chimera.html">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 22 22" fill="none">
+          <path d="M3 11 L11 3 L19 11 L11 19 Z" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M7 11 L11 7 L15 11 L11 15 Z" fill="currentColor" opacity="0.85"/>
+        </svg>
+      </span>
+      chimeraproject
+    </a>
+    <div class="proj-tabs">
+      <a class="proj-tab active" href="chimera.html">chimera</a>
+      <a class="proj-tab" href="libevpl.html">libevpl</a>
+    </div>
+    <nav class="nav">
+      <a href="chimera.html">Intro</a>
+      <a href="chimera-architecture.html">Architecture</a>
+      <a href="chimera-performance.html">Performance</a>
+      <a class="current" href="chimera-status.html">Status</a>
+      <a href="/chimera" target="_blank" rel="noopener">Docs&nbsp;↗</a>
+      <a class="gh" href="https://github.com/chimera-nas" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        GitHub
+      </a>
+      <a class="gh" href="https://discord.gg/hnRkvQFecq" target="_blank" rel="noopener" title="Discord"><svg viewBox="0 -28.5 256 256" fill="currentColor" aria-hidden="true" style="width:14px;height:14px"><path d="M216.856 16.597A208.502 208.502 0 0 0 164.042 0c-2.275 4.113-4.933 9.645-6.766 14.046-19.692-2.961-39.203-2.961-58.533 0-1.832-4.4-4.55-9.933-6.846-14.046a207.809 207.809 0 0 0-52.855 16.638C5.618 67.147-3.443 116.4 1.087 164.956c22.169 16.555 43.653 26.612 64.775 33.193A161.094 161.094 0 0 0 79.735 175.3a136.413 136.413 0 0 1-21.846-10.632 108.636 108.636 0 0 0 5.355-4.237c42.122 19.702 87.89 19.702 129.51 0a131.66 131.66 0 0 0 5.355 4.237 136.07 136.07 0 0 1-21.886 10.653c4.006 8.02 8.638 15.67 13.873 22.848 21.142-6.58 42.646-16.637 64.815-33.213 5.316-56.288-9.08-105.09-38.056-148.36ZM85.474 135.095c-12.645 0-23.015-11.805-23.015-26.18s10.149-26.2 23.015-26.2c12.867 0 23.236 11.804 23.015 26.2.02 14.375-10.148 26.18-23.015 26.18Zm85.051 0c-12.645 0-23.014-11.805-23.014-26.18s10.148-26.2 23.014-26.2c12.867 0 23.236 11.804 23.015 26.2 0 14.375-10.148 26.18-23.015 26.18Z"/></svg>Discord</a>
+    </nav>
+  </div>
+</header>
+
+<section class="page-hero">
+  <div class="shell">
+    <span class="kicker">Status &amp; conformance · §</span>
+    <h1>Project Maturity</h1>
+    <p class="lede">
+      The NFSv3, NFSv4 (4.0 / 4.1 / 4.2), and SMB2/3 servers implement the full data-path
+      and metadata operation set and pass real-Linux-client conformance suites. The data
+      path — read, write, metadata, locking — is mature and well exercised.
+      Reboot-recovery state persistence, Kerberos for NFS, and several advanced protocol
+      features are either present-but-incomplete or absent. Those gaps are listed below.
+    </p>
+  </div>
+</section>
+
+<div class="shell">
+
+  <!-- OVERVIEW CARDS -->
+  <div class="section-title"><span class="num">§ 01</span> At a glance</div>
+  <p class="section-intro">
+    Four protocol servers over one pluggable async VFS. Because they share the VFS, all
+    of them work across every backend — in-memory, Linux passthrough, and persistent.
+  </p>
+  <div class="statusgrid">
+    <div class="scard">
+      <div class="top">
+        <span class="name">NFSv3</span>
+        <span class="badge mature"><span class="led"></span>Mature</span>
+      </div>
+      <p>All 21 procedures, full MOUNT v3, and a real NLM byte-range lock manager routed
+      through the unified VFS lease layer. TCP and RPC-over-RDMA.</p>
+    </div>
+    <div class="scard">
+      <div class="top">
+        <span class="name">NFSv4 · 4.1 · 4.2</span>
+        <span class="badge mature"><span class="led"></span>Mature core</span>
+      </div>
+      <p>Single COMPOUND handler across all three minor versions. Sessions, state, ACLs,
+      xattrs, delegations, and pNFS (flex-files). Reboot-recovery persistence is
+      framework-only.</p>
+    </div>
+    <div class="scard">
+      <div class="top">
+        <span class="name">SMB2 · SMB3</span>
+        <span class="badge broad"><span class="led"></span>Broad coverage</span>
+      </div>
+      <p>All 19 commands, dialects through 3.1.1, signing, encryption, leases, durable
+      handles, change-notify, ACLs, Kerberos. Several advanced features ship disabled by
+      default.</p>
+    </div>
+    <div class="scard">
+      <div class="top">
+        <span class="name">S3</span>
+        <span class="badge partial"><span class="led"></span>Object path only</span>
+      </div>
+      <p>Object data path works — GET/PUT/HEAD/DELETE, ranged reads, full multipart,
+      SigV4/V2. Bucket management, versioning, ACLs, SSE, and conditional requests are
+      absent.</p>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:40px"><span class="num">§ 02</span> Backends</div>
+  <p class="section-intro">
+    Every protocol sits on the same VFS, so it runs identically across all backends. A
+    handful of features are backend-specific and noted in the per-protocol detail.
+  </p>
+  <div class="backends">
+    <span class="be"><span class="led"></span>memfs <span class="muted" style="color:var(--muted)">in-memory</span></span>
+    <span class="be"><span class="led"></span>linux <span class="muted" style="color:var(--muted)">passthrough</span></span>
+    <span class="be"><span class="led"></span>io_uring</span>
+    <span class="be"><span class="led"></span>cairn <span class="muted" style="color:var(--muted)">persistent</span></span>
+    <span class="be"><span class="led"></span>diskfs <span class="muted" style="color:var(--muted)">persistent</span></span>
+  </div>
+
+  <!-- PER-PROTOCOL DETAIL -->
+  <div class="section-title"><span class="num">§ 03</span> Feature detail, protocol by protocol</div>
+  <p class="section-intro">
+    Each protocol below splits into what's <b style="color:var(--good)">done</b>,
+    what's <b style="color:var(--warn)">partial</b> (works with caveats), and what's
+    <b>missing</b>. This is a summary — for the line-by-line detail and known bugs, the
+    <a href="https://github.com/chimera-nas" style="color:var(--accent);border-bottom:1px dotted var(--accent);text-decoration:none">GitHub issue tracker</a>
+    is the source of truth.
+  </p>
+
+  <!-- NFSv3 -->
+  <div class="proto">
+    <div class="proto-head">
+      <div class="l">
+        <span class="name">NFSv3</span>
+        <span class="tag">+ MOUNT v3 + NLM v4 locking</span>
+      </div>
+      <span class="badge mature" style="background:color-mix(in oklab, var(--good) 14%, var(--bg));color:var(--good)"><span class="led" style="width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--good)"></span>Mature</span>
+    </div>
+    <div class="cols3">
+      <div class="col done">
+        <h4><span class="mark">✓</span>Done</h4>
+        <ul>
+          <li>All <b>21 procedures</b> implemented, no stubs</li>
+          <li><b>MOUNT v3</b> — MNT, DUMP, UMNT, EXPORT, in-memory mount table</li>
+          <li><b>NLM v4</b> advisory byte-range locking through the unified VFS lease layer, with cross-protocol conflict detection</li>
+          <li>Write stability &amp; <code>COMMIT</code> with per-instance write verifier</li>
+          <li>Weak cache consistency (wcc) pre/post attrs</li>
+          <li>TCP and RPC-over-RDMA transports</li>
+          <li>Built-in portmap / rpcbind</li>
+        </ul>
+      </div>
+      <div class="col partial">
+        <h4><span class="mark">~</span>Partial</h4>
+        <ul>
+          <li>Blocking locks: cross-protocol conflicts ride the wait path; same-protocol contention returns <code>DENIED</code> (no async GRANTED queue)</li>
+          <li>Lock state is <b>in-memory only</b> — does not survive a server restart</li>
+          <li>SHARE / UNSHARE (DOS share modes) accepted but not enforced</li>
+          <li>EXPORT access control: advertised to all clients, no per-client restriction</li>
+        </ul>
+      </div>
+      <div class="col missing">
+        <h4><span class="mark">−</span>Missing</h4>
+        <ul>
+          <li><b>NSM / statd</b> — no crash-recovery lock-reclaim notification</li>
+          <li><b>RPCSEC_GSS / Kerberos</b> — non-AUTH_SYS flavors fall back to anonymous</li>
+          <li>UDP transport (TCP / RDMA only)</li>
+          <li>Duplicate Request Cache (v3 path)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- NFSv4 -->
+  <div class="proto">
+    <div class="proto-head">
+      <div class="l">
+        <span class="name">NFSv4 · 4.1 · 4.2</span>
+        <span class="tag">single COMPOUND handler, minorversion 0–2</span>
+      </div>
+      <span class="badge mature" style="background:color-mix(in oklab, var(--good) 14%, var(--bg));color:var(--good)"><span class="led" style="width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--good)"></span>Mature core</span>
+    </div>
+    <div class="cols3">
+      <div class="col done">
+        <h4><span class="mark">✓</span>Done</h4>
+        <ul>
+          <li><b>4.0 base</b> — every RFC 7530 operation has a real handler on the async VFS</li>
+          <li><b>4.1 sessions &amp; state</b> — EXCHANGE_ID, CREATE_SESSION, SEQUENCE, RECLAIM_COMPLETE, layout ops</li>
+          <li><b>4.2</b> — ALLOCATE, DEALLOCATE, SEEK, intra-server COPY, RFC 8276 xattrs</li>
+          <li><b>Delegations</b> — read/write, callback channel, recall timeout (config-gated, default off)</li>
+          <li><b>pNFS</b> — MDS + DS, flex-files primary; block &amp; SCSI layout types</li>
+          <li>Full <b>NFSv4 ACL</b> model end-to-end</li>
+          <li>v4.0 duplicate-request cache keyed by XID</li>
+        </ul>
+      </div>
+      <div class="col partial">
+        <h4><span class="mark">~</span>Partial</h4>
+        <ul>
+          <li><b>Reboot recovery</b>: grace/recovery framework exists but persist hooks are stubs — clients and state are <b>not remembered across a restart</b></li>
+          <li>SET_SSV accepts but returns an empty digest (SSV-secured RPC not wired)</li>
+          <li>SECINFO_NO_NAME returns a single hardcoded flavor</li>
+          <li>Exclusive-CREATE verifier not persisted</li>
+        </ul>
+      </div>
+      <div class="col missing">
+        <h4><span class="mark">−</span>Missing</h4>
+        <ul>
+          <li><b>RPCSEC_GSS / Kerberos</b> — SECINFO advertises a krb5 OID but the RPC layer only does AUTH_SYS/AUTH_NONE</li>
+          <li>4.2: READ_PLUS, CLONE, WRITE_SAME, IO_ADVISE, inter-server COPY</li>
+          <li>BIND_CONN_TO_SESSION, GET_DIR_DELEGATION</li>
+          <li>OPENATTR / named-attribute directories (user xattrs served via 4.2 ops instead)</li>
+          <li>CLAIM_DELEGATE_PREV (delegation reclaim after client reboot)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SMB -->
+  <div class="proto">
+    <div class="proto-head">
+      <div class="l">
+        <span class="name">SMB2 · SMB3</span>
+        <span class="tag">dialects 2.1 – 3.1.1 · all 19 commands</span>
+      </div>
+      <span class="badge broad" style="background:color-mix(in oklab, var(--accent) 14%, var(--bg));color:var(--accent)"><span class="led" style="width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--accent)"></span>Broad coverage</span>
+    </div>
+    <div class="cols3">
+      <div class="col done">
+        <h4><span class="mark">✓</span>Done</h4>
+        <ul>
+          <li><b>All 19 SMB2 commands</b> with real handlers</li>
+          <li>Dialects 2.1 / 3.0 / 3.0.2 / 3.1.1, with 3.1.1 negotiate contexts (preauth integrity, signing, encryption)</li>
+          <li><b>Auth</b>: NTLM/NTLMSSP, Kerberos (GSSAPI/krb5 + SPNEGO), guest, winbind/AD</li>
+          <li><b>Signing</b>: HMAC-SHA256, AES-CMAC, AES-GMAC</li>
+          <li><b>Encryption</b>: AES-128/256 CCM &amp; GCM</li>
+          <li>Oplocks &amp; <b>leases</b> (R/RW/RWH) on VFS caching leases</li>
+          <li><b>Multichannel</b> and <b>SMB Direct / RDMA</b> transport</li>
+          <li>Durable &amp; persistent handles; named streams; change-notify (inotify-backed)</li>
+          <li>Security descriptors / ACLs with NT↔VFS mapping; rich FSCTL set</li>
+        </ul>
+      </div>
+      <div class="col partial">
+        <h4><span class="mark">~</span>Partial</h4>
+        <ul>
+          <li><b>SMB Direct / RDMA</b>: SMB 3.0 framing only — the 3.1.1 transform (encrypted) variant is not yet wired</li>
+          <li>Durable handles: in-memory registry; cross-restart depends on record/recover, not a full store</li>
+          <li>Credits granted simplistically (no real windowing)</li>
+          <li>Byte-range locks work, but multi-lock requests (LockCount &gt; 1) rejected</li>
+          <li>SACL emitted empty (DACL/owner/group are real)</li>
+        </ul>
+      </div>
+      <div class="col missing">
+        <h4><span class="mark">−</span>Missing</h4>
+        <ul>
+          <li><b>DFS</b>, Witness protocol</li>
+          <li>Extended Attributes (accept-and-ignore)</li>
+          <li>SMB3 compression (context parsed, never applied)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="proto">
+    <div class="proto-head">
+      <div class="l">
+        <span class="name">S3</span>
+        <span class="tag">HTTP-to-VFS bridge · object data path</span>
+      </div>
+      <span class="badge partial" style="background:color-mix(in oklab, var(--warn) 14%, var(--bg));color:var(--warn)"><span class="led" style="width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--warn)"></span>Object path only</span>
+    </div>
+    <div class="cols3">
+      <div class="col done">
+        <h4><span class="mark">✓</span>Done</h4>
+        <ul>
+          <li><b>Object ops</b>: Put, Get (ranged), Head, Delete, batch DeleteObjects, server-side CopyObject</li>
+          <li><b>Multipart</b>: full set — create, upload, complete, abort, list</li>
+          <li><b>Auth</b>: AWS Signature V4 and V2</li>
+          <li>Streaming (aws-chunked) uploads</li>
+          <li>Listing with prefix; keep-alive; structured XML errors</li>
+        </ul>
+      </div>
+      <div class="col partial">
+        <h4><span class="mark">~</span>Partial</h4>
+        <ul>
+          <li><b>ETag is not content-MD5</b> (it's a hash of size/mtime/handle) — clients validating ETag==MD5 will mismatch</li>
+          <li>ListObjects incomplete: no pagination / continuation token, no delimiter / CommonPrefixes</li>
+          <li>Multipart &amp; CopyObject disabled on diskfs (backend bug); other backends fine</li>
+          <li>Single root credential — key is authenticated but not mapped to a VFS identity (no per-user authz)</li>
+          <li>No presigned URLs / anonymous access</li>
+        </ul>
+      </div>
+      <div class="col missing">
+        <h4><span class="mark">−</span>Missing</h4>
+        <ul>
+          <li><b>All bucket-level APIs</b> — buckets exist only as static config</li>
+          <li>Bucket policy / ACL / versioning / lifecycle / CORS / tagging</li>
+          <li>Object ACL, tagging, object lock / retention</li>
+          <li>Server-side encryption (SSE / SSE-KMS / SSE-C)</li>
+          <li>User metadata (<code>x-amz-meta-*</code>); conditional requests</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTH CALLOUT -->
+  <div class="section-title"><span class="num">§ 04</span> Authentication, in one place</div>
+  <div class="warning">
+    <div class="lab">security: read this if you’re evaluating</div>
+    <p>Strong authentication (<b>Kerberos / GSSAPI</b>) is implemented and working for
+    <b>SMB</b>, but <b>not for NFS</b> — the NFS RPC layer processes AUTH_SYS / AUTH_NONE
+    only, and the krb5 advertisement in SECINFO is not yet implemented.</p>
+    <p>On the S3 side the access key is authenticated but not mapped to a VFS identity, so
+    there is <b>no per-user authorization</b> yet — all operations run as root.</p>
+  </div>
+
+  <!-- TESTING -->
+  <div class="section-title"><span class="num">§ 05</span> How it's tested</div>
+  <p class="section-intro">
+    Chimera registers <b>~11,370 tests</b> via CTest, run in CI on a multi-image, dual-arch
+    (amd64 / arm64), Release + Debug matrix. We use real-Linux-client conformance suites,
+    not just our own unit tests.
+  </p>
+  <div class="bignum">
+    <div class="n"><div class="v">~11,370</div><div class="l">tests registered &amp; gated in CI</div></div>
+    <div class="n"><div class="v">67.9%</div><div class="l">of the full external SMB2/3 conformance surface (smbtorture) passes</div></div>
+    <div class="n"><div class="v">real clients</div><div class="l">Linux NFS &amp; SMB clients in KVM, plus in-process binding</div></div>
+  </div>
+
+  <div class="warning" style="border-color:color-mix(in oklab, var(--accent) 30%, var(--border));background:color-mix(in oklab, var(--accent) 5%, var(--bg))">
+    <div class="lab" style="color:var(--accent)">// how to read these numbers</div>
+    <p>CI gates on every test it runs, so the honest claim is <b>"everything we wire up
+    passes."</b> But two different things are being measured. <b>smbtorture</b> and
+    <b>KVM pNFS</b> register their <em>entire</em> external conformance surface and then
+    explicitly disable what doesn't pass — so their percentages are a true fraction of a
+    real-world surface. Every other suite registers <em>only</em> the cases it expects to
+    pass, so a 100% there means <b>"100% of what we chose to wire up,"</b> not 100% of the
+    protocol. Both are marked below.</p>
+  </div>
+
+  <div class="tests">
+    <div class="test-row head">
+      <div>Suite</div>
+      <div>What it validates</div>
+      <div class="reg">Tests</div>
+      <div class="pass">Pass</div>
+    </div>
+    <div class="test-row">
+      <div class="suite">smbtorture</div>
+      <div class="what">Samba SMB2/3 protocol conformance — the full external surface, with non-passing subtests explicitly disabled per backend.</div>
+      <div class="reg">828</div>
+      <div class="pass meaningful"><b>67.9%</b></div>
+    </div>
+    <div class="test-row">
+      <div class="suite">KVM pNFS</div>
+      <div class="what">flex / block / SCSI layout over a real Linux client. The 12.5% gap is all SCSI-layout — a QEMU SCSI-reservation harness limit, not a server defect.</div>
+      <div class="reg">192</div>
+      <div class="pass meaningful"><b>87.5%</b></div>
+    </div>
+    <div class="test-row">
+      <div class="suite">pynfs</div>
+      <div class="what">NFSv4.0 / 4.1 / 4.2 protocol conformance, across every backend and minor version.</div>
+      <div class="reg">6,689</div>
+      <div class="pass"><b>100%</b><span class="star"> *</span></div>
+    </div>
+    <div class="test-row">
+      <div class="suite">posix-cthon</div>
+      <div class="what">Connectathon NFS correctness, in-process client across all backends and NFS versions.</div>
+      <div class="reg">794</div>
+      <div class="pass"><b>100%</b><span class="star"> *</span></div>
+    </div>
+    <div class="test-row">
+      <div class="suite">posix stress / fsx</div>
+      <div class="what">fsx, fsstress, dirstress, nametest, fstest, rewinddir — in-process.</div>
+      <div class="reg">1,390</div>
+      <div class="pass"><b>100%</b><span class="star"> *</span></div>
+    </div>
+    <div class="test-row">
+      <div class="suite">KVM xfstests</div>
+      <div class="what">fsstress / fsx / etc. over a real Linux client, NFS 3 / 4.x.</div>
+      <div class="reg">576</div>
+      <div class="pass"><b>100%</b><span class="star"> *</span></div>
+    </div>
+    <div class="test-row">
+      <div class="suite">KVM cthon</div>
+      <div class="what">Connectathon over a real Linux client.</div>
+      <div class="reg">288</div>
+      <div class="pass"><b>100%</b><span class="star"> *</span></div>
+    </div>
+    <div class="test-row">
+      <div class="suite">KVM SMB</div>
+      <div class="what">SMB cthon / xfstests over a real Linux client.</div>
+      <div class="reg">216</div>
+      <div class="pass"><b>100%</b><span class="star"> *</span></div>
+    </div>
+    <div class="test-row">
+      <div class="suite">WPTS</div>
+      <div class="what">Microsoft MS-SMB2 server conformance (.NET) — base plus persistent-handle cases.</div>
+      <div class="reg">63</div>
+      <div class="pass"><b>100%</b><span class="star"> *</span></div>
+    </div>
+    <div class="test-row">
+      <div class="suite">S3 (boto3)</div>
+      <div class="what">S3 functional behavior — put / get / head / delete / list / copy / multipart / streaming, V4 and V2.</div>
+      <div class="reg">52</div>
+      <div class="pass"><b>100%</b><span class="star"> *</span></div>
+    </div>
+    <div class="test-row">
+      <div class="suite">unit + submodule</div>
+      <div class="what">VFS, client, server internals, plus libevpl / xdrzcc / prometheus-c dependency suites.</div>
+      <div class="reg">~278</div>
+      <div class="pass"><b>100%</b></div>
+    </div>
+  </div>
+  <p class="ghnote">
+    <span class="star" style="color:var(--muted)">*</span> 100% <b style="color:var(--fg-soft);font-weight:500">by construction</b> — only
+    expected-pass cases are registered, so this reflects coverage of what's wired up, not
+    the full protocol surface. A pynfs/s3-tests number comparable to the smbtorture figure
+    would require running the complete upstream suites without curated registration, which
+    CI does not currently encode.
+  </p>
+
+  <div class="section-title" style="margin-top:48px"><span class="num">§ 06</span> smbtorture, by backend</div>
+  <p class="section-intro">
+    Because smbtorture measures against the full SMB2/3 surface, it's the clearest read on
+    real conformance. <b>memfs</b> leads with the complete feature set (including named
+    streams); the passthrough backends trail because they can't persist btime / DOS
+    attributes and don't support alternate data streams, so those subtests stay disabled.
+  </p>
+  <div class="bd">
+    <div class="bd-row head">
+      <div class="be">Backend</div>
+      <div class="num">Enabled</div>
+      <div class="num">Disabled</div>
+      <div class="pct">Pass %</div>
+    </div>
+    <div class="bd-row">
+      <div class="be">memfs</div>
+      <div class="num">109</div>
+      <div class="num">29</div>
+      <div class="pct">79.0%</div>
+    </div>
+    <div class="bd-row">
+      <div class="be">diskfs <span style="color:var(--muted)">(io_uring / aio)</span></div>
+      <div class="num">101</div>
+      <div class="num">37</div>
+      <div class="pct">73.2%</div>
+    </div>
+    <div class="bd-row">
+      <div class="be">cairn</div>
+      <div class="num">99</div>
+      <div class="num">39</div>
+      <div class="pct">71.7%</div>
+    </div>
+    <div class="bd-row">
+      <div class="be">linux / io_uring <span style="color:var(--muted)">(passthrough)</span></div>
+      <div class="num">76</div>
+      <div class="num">62</div>
+      <div class="pct">55.1%</div>
+    </div>
+    <div class="bd-row total">
+      <div class="be">Overall</div>
+      <div class="num">562</div>
+      <div class="num">266</div>
+      <div class="pct">67.9%</div>
+    </div>
+  </div>
+  <p class="ghnote">
+    A real-Windows-client SMB suite exists on a feature branch but is not yet wired into
+    mainline CI. KVM suites require nested virtualization and run only on KVM-capable
+    runners.
+  </p>
+
+  <!-- BOTTOM SUMMARY / CTA -->
+  <div class="warning" style="margin-top:48px;border-color:var(--border-strong);background:var(--surface)">
+    <div class="lab" style="color:var(--accent)">// the short version</div>
+    <p>The data-path and metadata operations across NFSv3, NFSv4, and SMB2/3 are mature and
+    pass real-client conformance suites. The most significant gaps to know about before
+    leaning on Chimera in production: <b>no Kerberos for NFS</b>; <b>NFSv4 reboot-recovery
+    state isn't persisted</b> across a server restart; and the <b>S3 server is
+    object-data-path only</b> — no bucket management, versioning, ACLs, SSE, or conditional
+    requests. Several advanced SMB features (encryption, persistent handles, Kerberos) ship
+    <b>disabled by default</b>.</p>
+  </div>
+
+  <p class="ghnote" style="margin-bottom:96px">
+    This page is a summary. For line-by-line operation support, current bugs, and the
+    roadmap, see the <a href="https://github.com/chimera-nas" target="_blank" rel="noopener">issue tracker on GitHub</a>
+    or ask in <a href="https://discord.gg/hnRkvQFecq" target="_blank" rel="noopener">Discord</a>.
+  </p>
+
+</div>
+
+<footer class="site-foot">
+  <div class="shell">
+    <div class="cols">
+      <div>
+        <a class="brand" href="index.html" style="margin-bottom:12px">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 22 22" fill="none">
+              <path d="M3 11 L11 3 L19 11 L11 19 Z" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M7 11 L11 7 L15 11 L11 15 Z" fill="currentColor" opacity="0.85"/>
+            </svg>
+          </span>
+          chimeraproject
+        </a>
+        <p style="margin-top:14px;max-width:32ch">An experimental, multi-protocol, user-space NAS stack. Research-grade. Open source.</p>
+      </div>
+      <div>
+        <h4>chimera</h4>
+        <a href="chimera.html">Intro</a>
+        <a href="chimera-architecture.html">Architecture</a>
+        <a href="chimera-performance.html">Performance</a>
+        <a href="chimera-status.html">Status</a>
+      </div>
+      <div>
+        <h4>libevpl</h4>
+          <a href="libevpl.html">Architecture</a>
+        <a href="libevpl-performance.html">Performance</a>
+        <a href="libevpl-build.html">Build</a>
+      </div>
+      <div>
+        <h4>Source &amp; chat</h4>
+        <a href="https://github.com/chimera-nas" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://discord.gg/hnRkvQFecq" target="_blank" rel="noopener">Discord</a>
+      </div>
+    </div>
+    <div class="meta">
+      <span>License — LGPL-2.1</span>
+      <span>© 2026 the Chimera authors</span>
+      <span style="margin-left:auto">v0.1.0 · status as of June 2026</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

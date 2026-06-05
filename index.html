@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>chimeraproject — high-performance NAS &amp; I/O, in user space</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@300;400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+<style>
+.toplay {
+  min-height: calc(100vh - 52px);
+  display: flex; flex-direction: column;
+}
+
+.hero {
+  padding: 96px 0 64px;
+  border: 0 !important;
+  text-align: center;
+}
+.hero .lockup {
+  display: inline-flex; align-items: center; gap: 14px;
+  margin-bottom: 32px;
+}
+.hero .lockup .mark {
+  width: 36px; height: 36px;
+  color: var(--accent);
+}
+.hero .lockup .mark svg { width: 100%; height: 100%; }
+.hero .lockup .name {
+  font-family: var(--font-mono); font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--fg);
+}
+.hero .lockup .name b { font-weight: 500; }
+.hero .lockup .name span { color: var(--muted); margin-left: 8px; }
+
+.hero h1 {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: clamp(40px, 5.4vw, 64px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0 auto 28px;
+}
+.hero h1 em {
+  font-style: italic; color: var(--accent);
+}
+.hero .lede {
+  font-family: var(--font-mono);
+  font-size: 15px; line-height: 1.7;
+  color: var(--fg-soft);
+  max-width: 72ch;
+  margin: 0 auto;
+}
+.hero .lede a {
+  color: var(--accent); text-decoration: none;
+  border-bottom: 1px dotted var(--accent);
+}
+.hero .meta {
+  display: inline-flex; gap: 28px; flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 32px;
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.14em;
+}
+.hero .meta span b { color: var(--fg); font-weight: 500; }
+.hero .meta a { color: var(--fg-soft); text-decoration: none; border-bottom: 1px dotted var(--border-strong); }
+.hero .meta a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* Project cards */
+.projects {
+  padding: 0 0 120px;
+  border: 0 !important;
+}
+.projects .label {
+  font-family: var(--font-mono); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.16em;
+  color: var(--muted);
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 24px;
+}
+.projects .label::after {
+  content: ""; flex: 1; height: 1px; background: var(--border);
+}
+.projects-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.proj {
+  background: var(--bg);
+  padding: 36px 36px 40px;
+  display: flex; flex-direction: column;
+  text-decoration: none; color: inherit;
+  position: relative;
+  transition: background 160ms;
+  min-height: 380px;
+}
+.proj:hover { background: var(--surface); }
+.proj:hover .arrow { transform: translateX(4px); color: var(--accent); }
+.proj .top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 22px;
+}
+.proj .pid {
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--muted); text-transform: uppercase; letter-spacing: 0.14em;
+}
+.proj .pstatus {
+  font-family: var(--font-mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.16em;
+  padding: 3px 7px; border: 1px solid var(--border-strong);
+  border-radius: 2px;
+  color: var(--muted);
+}
+.proj h2 {
+  font-family: var(--font-serif);
+  font-weight: 400; font-style: italic;
+  font-size: 44px; line-height: 1;
+  margin-bottom: 4px;
+}
+.proj .tag {
+  font-family: var(--font-mono); font-size: 12px;
+  color: var(--accent);
+  margin-bottom: 18px;
+}
+.proj .desc {
+  font-family: var(--font-mono); font-size: 13px;
+  color: var(--fg-soft); line-height: 1.65;
+  flex: 1;
+}
+.proj .ops {
+  display: flex; flex-wrap: wrap; gap: 4px;
+  margin-top: 18px; padding-top: 18px;
+  border-top: 1px dashed var(--border);
+}
+.proj .op {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.04em;
+  padding: 3px 8px; border-radius: 2px;
+  background: var(--surface-2); color: var(--muted);
+  border: 1px solid var(--border);
+}
+.proj .footer-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 24px;
+  font-family: var(--font-mono); font-size: 12px;
+  color: var(--muted);
+}
+.proj .arrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--fg);
+  transition: transform 160ms, color 160ms;
+}
+.proj .arrow .glyph { font-size: 14px; }
+.proj .repo { font-family: var(--font-mono); font-size: 11px; }
+
+/* Relationship line */
+.relationship {
+  margin: 56px 0 0;
+  padding: 28px 0 0;
+  border-top: 1px solid var(--border);
+}
+.relationship .row {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+.relationship .key {
+  font-family: var(--font-mono); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.16em;
+  color: var(--muted);
+  padding-top: 4px;
+}
+.relationship .val {
+  font-family: var(--font-mono); font-size: 13px;
+  color: var(--fg-soft); line-height: 1.75;
+  max-width: 70ch;
+}
+.relationship .val b { color: var(--fg); font-weight: 500; }
+.relationship .val .acc { color: var(--accent); }
+
+/* Status line strip */
+.statusline {
+  display: flex; flex-wrap: wrap; gap: 16px 28px;
+  padding: 18px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.12em;
+}
+.statusline .item { display: inline-flex; align-items: center; gap: 8px; }
+.statusline .led {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--warn);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--warn) 22%, transparent);
+}
+.statusline .led.good { background: var(--good); box-shadow: 0 0 0 2px color-mix(in oklab, var(--good) 22%, transparent); }
+.statusline .led.bad  { background: var(--bad);  box-shadow: 0 0 0 2px color-mix(in oklab, var(--bad)  22%, transparent); }
+.statusline b { color: var(--fg-soft); font-weight: 500; }
+
+@media (max-width: 820px) {
+  .projects-grid { grid-template-columns: 1fr; }
+  .relationship .row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="shell topbar-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 22 22" fill="none">
+          <path d="M3 11 L11 3 L19 11 L11 19 Z" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M7 11 L11 7 L15 11 L11 15 Z" fill="currentColor" opacity="0.85"/>
+        </svg>
+      </span>
+      chimeraproject
+    </a>
+    <div class="proj-tabs">
+      <a class="proj-tab" href="chimera.html">chimera</a>
+      <a class="proj-tab" href="libevpl.html">libevpl</a>
+    </div>
+    <nav class="nav">
+      <a class="gh" href="https://github.com/chimera-nas" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        GitHub
+      </a>
+      <a class="gh" href="https://discord.gg/hnRkvQFecq" target="_blank" rel="noopener" title="Discord"><svg viewBox="0 -28.5 256 256" fill="currentColor" aria-hidden="true" style="width:14px;height:14px"><path d="M216.856 16.597A208.502 208.502 0 0 0 164.042 0c-2.275 4.113-4.933 9.645-6.766 14.046-19.692-2.961-39.203-2.961-58.533 0-1.832-4.4-4.55-9.933-6.846-14.046a207.809 207.809 0 0 0-52.855 16.638C5.618 67.147-3.443 116.4 1.087 164.956c22.169 16.555 43.653 26.612 64.775 33.193A161.094 161.094 0 0 0 79.735 175.3a136.413 136.413 0 0 1-21.846-10.632 108.636 108.636 0 0 0 5.355-4.237c42.122 19.702 87.89 19.702 129.51 0a131.66 131.66 0 0 0 5.355 4.237 136.07 136.07 0 0 1-21.886 10.653c4.006 8.02 8.638 15.67 13.873 22.848 21.142-6.58 42.646-16.637 64.815-33.213 5.316-56.288-9.08-105.09-38.056-148.36ZM85.474 135.095c-12.645 0-23.015-11.805-23.015-26.18s10.149-26.2 23.015-26.2c12.867 0 23.236 11.804 23.015 26.2.02 14.375-10.148 26.18-23.015 26.18Zm85.051 0c-12.645 0-23.014-11.805-23.014-26.18s10.148-26.2 23.014-26.2c12.867 0 23.236 11.804 23.015 26.2 0 14.375-10.148 26.18-23.015 26.18Z"/></svg>Discord</a>
+    </nav>
+  </div>
+</header>
+
+<div class="toplay">
+
+  <section class="hero">
+    <div class="shell">
+      <div class="lockup">
+        <span class="mark" aria-hidden="true">
+          <svg viewBox="0 0 36 36" fill="none">
+            <path d="M5 18 L18 5 L31 18 L18 31 Z" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M11 18 L18 11 L25 18 L18 25 Z" fill="currentColor" opacity="0.9"/>
+          </svg>
+        </span>
+        <span class="name"><b>chimeraproject</b><span>// high-performance NAS &amp; I/O, in user space</span></span>
+      </div>
+      <h1>User-space NAS without compromise</h1>
+      <p class="lede">
+        chimeraproject is two C libraries for building storage systems in user space.
+        <b><a href="libevpl.html">libevpl</a></b> is the I/O runtime: a sockets-style API
+        that can run over kernel sockets, io_uring, RDMA, or XLIO, picked at configuration
+        time rather than in code. <b><a href="chimera.html">chimera</a></b> is a
+        multi-protocol NAS stack built on it — clients and servers for NFS, SMB, and S3 —
+        all going through a single VFS, so a storage backend implements one interface
+        instead of three separate protocol gateways. The aim is for user space to be a
+        practical place to build high-performance distributed storage, not a slower one.
+      </p>
+      <div class="meta">
+        <span><b>license</b> — lgpl-2.1</span>
+        <span><b>language</b> — C</span>
+        <span><b>repos</b> — <a href="https://github.com/chimera-nas" target="_blank" rel="noopener">github.com/chimera-nas</a></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="projects">
+    <div class="shell">
+      <div class="label">projects//</div>
+      <div class="projects-grid">
+
+        <a class="proj" href="chimera.html">
+          <div class="top">
+            <span class="pid">01 / chimera</span>
+            <span class="pstatus">experimental</span>
+          </div>
+          <h2>chimera</h2>
+          <div class="tag">protocol-native NAS · user space · async · zero-copy</div>
+          <p class="desc">
+            NAS clients and servers for NFS, SMB, and S3, built on one async VFS with a
+            shared cache and runtime. The VFS exposes the operations these protocols
+            actually use — file handles, create dispositions, multipart uploads,
+            server-side copy — rather than reducing everything to POSIX calls and
+            reconstructing the rest.
+          </p>
+          <div class="ops">
+            <span class="op">nfsv3</span>
+            <span class="op">nfsv4</span>
+            <span class="op">smb2 · smb3</span>
+            <span class="op">s3</span>
+            <span class="op">async vfs</span>
+            <span class="op">capability negotiation</span>
+            <span class="op">zero-copy</span>
+          </div>
+          <div class="footer-row">
+            <span class="repo">repo · chimera-nas/chimera</span>
+            <span class="arrow">read more <span class="glyph">→</span></span>
+          </div>
+        </a>
+
+        <a class="proj" href="libevpl.html">
+          <div class="top">
+            <span class="pid">02 / libevpl</span>
+            <span class="pstatus">pre-stable</span>
+          </div>
+          <h2>libevpl</h2>
+          <div class="tag">async i/o runtime · event + poll</div>
+          <p class="desc">
+            An I/O runtime with a BSD-style sockets and block-device API on a single
+            event loop. The name is short for event + poll: the loop waits on epoll when
+            idle and switches to busy-polling under load. The transport — kernel sockets,
+            io_uring, RDMA, XLIO, or VFIO-NVMe — is chosen by configuration; the
+            application code stays the same either way.
+          </p>
+          <div class="ops">
+            <span class="op">epoll</span>
+            <span class="op">io_uring</span>
+            <span class="op">rdma cm</span>
+            <span class="op">xlio</span>
+            <span class="op">vfio nvme</span>
+            <span class="op">zero-copy buffers</span>
+            <span class="op">hybrid event/poll</span>
+          </div>
+          <div class="footer-row">
+            <span class="repo">repo · chimera-nas/libevpl</span>
+            <span class="arrow">read more <span class="glyph">→</span></span>
+          </div>
+        </a>
+
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+<footer class="site-foot">
+  <div class="shell">
+    <div class="cols">
+      <div>
+        <a class="brand" href="index.html" style="margin-bottom:12px">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 22 22" fill="none">
+              <path d="M3 11 L11 3 L19 11 L11 19 Z" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M7 11 L11 7 L15 11 L11 15 Z" fill="currentColor" opacity="0.85"/>
+            </svg>
+          </span>
+          chimeraproject
+        </a>
+        <p style="margin-top:14px;max-width:36ch">Two C libraries for building distributed storage in user space: a multi-protocol NAS stack and the I/O runtime it runs on.</p>
+      </div>
+      <div>
+        <h4>chimera</h4>
+        <a href="chimera.html">Intro</a>
+        <a href="chimera-architecture.html">Architecture</a>
+      <a href="chimera-performance.html">Performance</a>
+        <a href="chimera-status.html">Status</a>
+      </div>
+      <div>
+        <h4>libevpl</h4>
+        <a href="libevpl.html">Architecture</a>
+        <a href="libevpl-performance.html">Performance</a>
+        <a href="libevpl-build.html">Build &amp; install</a>
+        <a href="https://chimeraproject.io/libevpl/api" target="_blank" rel="noopener">API reference ↗</a>
+      </div>
+      <div>
+        <h4>Source</h4>
+        <a href="https://github.com/chimera-nas" target="_blank" rel="noopener">GitHub org</a>
+        <a href="https://github.com/chimera-nas/chimera" target="_blank" rel="noopener">chimera-nas/chimera</a>
+        <a href="https://github.com/chimera-nas/libevpl" target="_blank" rel="noopener">chimera-nas/libevpl</a>
+        <a href="https://discord.gg/hnRkvQFecq" target="_blank" rel="noopener">Discord</a>
+      </div>
+    </div>
+    <div class="meta">
+      <span>License — LGPL-2.1</span>
+      <span>© 2026 the chimeraproject contributors</span>
+      <span style="margin-left:auto">Not yet a production system.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Tweaks panel -->
+<button class="tweaks-fab" id="tweaks-fab" aria-label="Open tweaks">⚙</button>
+<div class="tweaks" id="tweaks" role="dialog" aria-label="Tweaks">
+  <div class="tweaks-title">
+    Tweaks
+    <button class="tweaks-close" id="tweaks-close" aria-label="Close">×</button>
+  </div>
+  <div class="tweaks-row">
+    <label>Theme</label>
+    <div class="seg" id="seg-theme">
+      <button data-val="dark" class="active">Dark</button>
+      <button data-val="light">Light</button>
+    </div>
+  </div>
+  <div class="tweaks-row">
+    <label>Accent</label>
+    <div class="swatches" id="swatches">
+      <button data-h="55"  style="background: oklch(72% 0.15 55)"  class="active" title="Ember"></button>
+      <button data-h="145" style="background: oklch(72% 0.15 145)" title="Lichen"></button>
+      <button data-h="260" style="background: oklch(72% 0.15 260)" title="Cobalt"></button>
+      <button data-h="320" style="background: oklch(72% 0.15 320)" title="Magenta"></button>
+      <button data-h="80"  style="background: oklch(72% 0.06 80)"  title="Stone"></button>
+    </div>
+  </div>
+  <div class="tweaks-row">
+    <label>Density</label>
+    <div class="seg" id="seg-density">
+      <button data-val="0.85">Compact</button>
+      <button data-val="1" class="active">Default</button>
+      <button data-val="1.2">Roomy</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const TWEAK_DEFAULS = /*EDITMODE-BEGIN*/{
+  "theme": "dark",
+  "accent": 55,
+  "density": 1
+}/*EDITMODE-END*/;
+
+const fab = document.getElementById("tweaks-fab");
+const panel = document.getElementById("tweaks");
+fab.addEventListener("click", () => panel.classList.toggle("open"));
+document.getElementById("tweaks-close").addEventListener("click", () => panel.classList.remove("open"));
+
+function bindSeg(id, fn) {
+  const seg = document.getElementById(id);
+  seg.querySelectorAll("button").forEach(b => {
+    b.addEventListener("click", () => {
+      seg.querySelectorAll("button").forEach(x => x.classList.toggle("active", x === b));
+      fn(b.dataset.val);
+    });
+  });
+}
+bindSeg("seg-theme", v => {
+  if (v === "dark") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme", v);
+});
+bindSeg("seg-density", v => document.documentElement.style.setProperty("--density", v));
+document.getElementById("swatches").querySelectorAll("button").forEach(b => {
+  b.addEventListener("click", () => {
+    document.getElementById("swatches").querySelectorAll("button").forEach(x => x.classList.toggle("active", x === b));
+    const h = b.dataset.h;
+    const light = document.documentElement.getAttribute("data-theme") === "light";
+    const L = light ? "58%" : "72%";
+    const C = h === "80" ? "0.06" : (light ? "0.14" : "0.15");
+    document.documentElement.style.setProperty("--accent", `oklch(${L} ${C} ${h})`);
+    document.documentElement.style.setProperty("--accent-soft", light
+      ? `oklch(92% 0.04 ${h})`
+      : `oklch(26% 0.06 ${h})`);
+  });
+});
+</script>
+
+</body>
+</html>
