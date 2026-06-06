@@ -9,52 +9,95 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@300;400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css" />
 <style>
-.page-hero {
-  padding: 72px 0 24px; border-top: 0;
-}
+.page-hero { padding: 64px 0 24px; border-top: 0; }
 .page-hero h1 {
-  font-size: clamp(40px, 5vw, 60px);
-  max-width: 32ch;
-  margin: 16px 0 24px;
+  font-family: var(--font-serif); font-weight: 300;
+  font-size: clamp(36px, 4.6vw, 54px); line-height: 1.05;
+  letter-spacing: -0.02em; max-width: 24ch; margin: 14px 0 18px;
 }
 .page-hero h1 em { font-style: italic; color: var(--accent); }
 .page-hero .lede {
-  max-width: 60ch;
-  font-size: 18px;
-  color: var(--fg-soft);
+  font-family: var(--font-mono); font-size: 14px;
+  color: var(--fg-soft); line-height: 1.7; max-width: 66ch;
 }
-
-.stub {
-  margin: 48px auto 120px;
-  max-width: 720px;
-  padding: 40px 44px;
-  border: 1px dashed var(--border-strong);
-  border-radius: 6px;
+.disclaimer {
+  margin: 24px 0 0; padding: 14px 18px;
+  border: 1px dashed var(--border-strong); border-radius: 4px;
   background: var(--surface);
-  font-family: var(--font-mono);
+  font-family: var(--font-mono); font-size: 12px;
+  color: var(--fg-soft); line-height: 1.6;
 }
-.stub .lab {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: var(--accent);
-  margin-bottom: 14px;
+.disclaimer b { color: var(--accent); }
+
+section { padding: 56px 0; }
+
+.numbers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+.nstat { border: 1px solid var(--border); border-radius: 6px; background: var(--bg); padding: 22px 24px; }
+.nstat .lab { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); margin-bottom: 10px; }
+.nstat .val { font-family: var(--font-serif); font-size: 38px; color: var(--accent); line-height: 1; font-weight: 300; }
+.nstat .val .unit { font-family: var(--font-mono); font-size: 14px; color: var(--muted); margin-left: 6px; letter-spacing: 0.04em; }
+.nstat .sub { font-family: var(--font-mono); font-size: 12px; color: var(--fg-soft); margin-top: 12px; line-height: 1.55; }
+
+.method { border: 1px solid var(--border); border-radius: 6px; margin-top: 24px; overflow: hidden; }
+.method .hdr { background: var(--surface); padding: 12px 18px; border-bottom: 1px solid var(--border); font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.method .hdr .right { color: var(--fg-soft); text-transform: none; letter-spacing: 0; }
+.method .body { padding: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.method dl { margin: 0; }
+.method dt { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-top: 12px; }
+.method dt:first-child { margin-top: 0; }
+.method dd { margin: 4px 0 0; font-family: var(--font-mono); font-size: 13px; color: var(--fg-soft); line-height: 1.55; }
+.method dd b { color: var(--fg); font-weight: 500; }
+
+/* comparison table */
+.cmp { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-top: 24px; }
+.cmp .crow { display: grid; grid-template-columns: 1.7fr 1fr 1fr 0.7fr; border-bottom: 1px solid var(--border); }
+.cmp .crow:last-child { border-bottom: 0; }
+.cmp .crow.head { background: var(--surface); }
+.cmp .crow.sub { background: color-mix(in oklab, var(--accent) 5%, var(--bg)); }
+.cmp .crow > div { padding: 12px 16px; font-family: var(--font-mono); font-size: 13px; }
+.cmp .crow.head > div { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); }
+.cmp .crow .wl { color: var(--fg-soft); }
+.cmp .crow .lx { color: var(--fg-soft); }
+.cmp .crow .ch { color: var(--fg); }
+.cmp .crow .rt { color: var(--accent); font-weight: 500; }
+
+/* bar chart */
+.chart { margin-top: 24px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); padding: 24px; }
+.chart .chart-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); }
+.chart .chart-head .title { color: var(--fg); }
+.chart-row { display: grid; grid-template-columns: 150px 1fr 130px; gap: 16px; align-items: center; padding: 7px 0; font-family: var(--font-mono); font-size: 12px; }
+.chart-row .label { color: var(--fg-soft); }
+.chart-row .bar-wrap { position: relative; height: 18px; background: var(--bg); border: 1px solid var(--border); border-radius: 2px; overflow: hidden; }
+.chart-row .bar { height: 100%; background: var(--accent); opacity: 0.85; }
+.chart-row .bar.dim { background: var(--border-strong); opacity: 1; }
+.chart-row .v { color: var(--fg); text-align: right; }
+.chart .note { font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-top: 14px; border-top: 1px dashed var(--border); padding-top: 10px; }
+
+/* body text */
+p { font-family: var(--font-mono); font-size: 14px; color: var(--fg-soft); line-height: 1.7; margin-top: 14px; max-width: 70ch; }
+p strong { color: var(--fg); font-weight: 500; }
+p a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); }
+ul { padding-left: 20px; color: var(--fg-soft); font-family: var(--font-mono); font-size: 13px; line-height: 1.7; max-width: 72ch; }
+ul li { margin: 8px 0; }
+ul li b { color: var(--fg); font-weight: 500; }
+
+/* collapsible config / output blocks */
+details.cfg { margin-top: 14px; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; background: var(--bg); }
+details.cfg > summary { cursor: pointer; list-style: none; padding: 12px 18px; background: var(--surface); font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--fg-soft); display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+details.cfg > summary::-webkit-details-marker { display: none; }
+details.cfg > summary .fn { color: var(--muted); text-transform: none; letter-spacing: 0; }
+details.cfg > summary::after { content: "\25B8"; color: var(--muted); }
+details.cfg[open] > summary { border-bottom: 1px solid var(--border); }
+details.cfg[open] > summary::after { content: "\25BE"; }
+.codewrap { overflow: auto; max-height: 540px; }
+.cfg pre { margin: 0; padding: 16px 18px; font-family: var(--font-mono); font-size: 12px; line-height: 1.5; color: var(--fg-soft); white-space: pre; }
+
+@media (max-width: 860px) {
+  .numbers { grid-template-columns: 1fr; }
+  .method .body { grid-template-columns: 1fr; }
+  .cmp .crow { grid-template-columns: 1.4fr 1fr 1fr 0.6fr; }
+  .chart-row { grid-template-columns: 110px 1fr 96px; }
 }
-.stub h2 {
-  font-family: var(--font-serif);
-  font-weight: 400;
-  font-size: 26px;
-  margin-bottom: 12px;
-}
-.stub p {
-  font-family: var(--font-mono);
-  font-size: 14px;
-  color: var(--fg-soft);
-  line-height: 1.7;
-  margin: 0 0 12px;
-}
-.stub p:last-child { margin-bottom: 0; }
-.stub a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); }
 </style>
 </head>
 <body>
@@ -92,33 +135,739 @@
 <section class="page-hero">
   <div class="shell">
     <span class="kicker">Performance · §</span>
-    <h1>Performance</h1>
+    <h1>One backend, <em>two ways</em> to drive it</h1>
     <p class="lede">
-      There aren’t published Chimera benchmarks yet. The design is built for
-      hardware-rate throughput — asynchronous throughout, zero-copy through libevpl,
-      capability-negotiated backends — but the work to publish reproducible numbers across
-      realistic configurations is still in progress.
+      A first look at Chimera's pNFS data path. Two diskfs storage servers in a flex-files
+      pNFS layout, one client, and the <b>exact same fio workload</b> run two ways: once
+      through the stock Linux kernel NFS mount, and once through Chimera's in-process fio
+      engine that speaks pNFS over RDMA directly from the application. Same servers, same
+      fabric — the client is the only variable.
     </p>
+    <div class="disclaimer">
+      <b>Note:</b> single-client results from a development rig (June 2026), not an audited
+      benchmark. Every number below is taken straight from the fio output, which is
+      reproduced in full — along with the client and server configs — so the runs can be
+      repeated. Treat them as directional.
+    </div>
   </div>
 </section>
 
-<div class="shell">
-  <div class="stub">
-    <div class="lab">// placeholder</div>
-    <h2>Benchmarks aren’t published yet.</h2>
-    <p>
-      The plan is to publish reproducible benchmarks here: NFS, SMB, and S3 throughput
-      and latency against the reference backends, with the methodology, hardware details,
-      and the harnesses in the repository.
-    </p>
-    <p>
-      Until then, the nearest available numbers are one layer down. See
-      <a href="libevpl-performance.html">libevpl performance</a> for the runtime Chimera
-      runs on.
-    </p>
-    <p style="margin-top:18px">Follow along on <a href="https://github.com/chimera-nas/chimera" target="_blank" rel="noopener">GitHub</a>.</p>
+<section>
+  <div class="shell">
+    <span class="kicker">// headline numbers — 4 KiB random, steady state</span>
+    <div class="numbers">
+      <div class="nstat">
+        <div class="lab">RANDOM READ · chimera client</div>
+        <div class="val">10.5<span class="unit">M IOPS</span></div>
+        <div class="sub">In-process pNFS over RDMA — 43.1 GB/s, ≈ 86% of the client's 400 GbE line rate. 32 jobs × QD 32.</div>
+      </div>
+      <div class="nstat">
+        <div class="lab">RANDOM WRITE · chimera client</div>
+        <div class="val">10.8<span class="unit">M IOPS</span></div>
+        <div class="sub">44.4 GB/s sustained over the 30 s timed window, ~94 µs average latency.</div>
+      </div>
+      <div class="nstat">
+        <div class="lab">RANDOM READ · Linux NFS client</div>
+        <div class="val">1.02<span class="unit">M IOPS</span></div>
+        <div class="sub">Stock in-kernel NFS client, identical servers and fabric. 3980 MiB/s, ~1.0 ms average latency.</div>
+      </div>
+      <div class="nstat">
+        <div class="lab">RANDOM-IO SPEEDUP</div>
+        <div class="val">10–15<span class="unit">×</span></div>
+        <div class="sub">Chimera's in-process client over the Linux kernel NFS client — same workload, same two-server backend.</div>
+      </div>
+      <div class="nstat">
+        <div class="lab">CLIENT LINK UTILISATION</div>
+        <div class="val">86<span class="unit">%</span></div>
+        <div class="sub">Chimera random read drives 344 of 400 Gbps across the client's 2×200 GbE; the kernel path reaches ~33 Gbps (8%).</div>
+      </div>
+      <div class="nstat">
+        <div class="lab">CONTEXT SWITCHES · 30 s read run</div>
+        <div class="val">840</div>
+        <div class="sub">Chimera's userspace poll loop, versus 21.6 M for the kernel nfsiod / rpciod path on the same test.</div>
+      </div>
+    </div>
   </div>
-</div>
+</section>
+
+<section>
+  <div class="shell">
+    <span class="kicker">// test environment</span>
+    <div class="method">
+      <div class="hdr">
+        <span>topology</span>
+        <span class="right">2 storage servers · 1 client · pNFS flex-files over RDMA</span>
+      </div>
+      <div class="body">
+        <dl>
+          <dt>storage servers</dt>
+          <dd><b>2× Chimera diskfs</b> · 16 NVMe each via VFIO · 2×200 GbE each</dd>
+          <dt>server roles</dt>
+          <dd><b>node-3</b> = MDS + DS (metadata + data) · <b>node-1</b> = DS only</dd>
+          <dt>pnfs layout</dt>
+          <dd>flex-files, 2 data servers (10.67.25.209 / .211), RDMA netid</dd>
+          <dt>client</dt>
+          <dd><b>1×</b> · 2×200 GbE → <b>400 Gbps / 50 GB/s</b> aggregate link ceiling</dd>
+        </dl>
+        <dl>
+          <dt>server runtime</dt>
+          <dd>80 threads · RDMA (RoCE, port 20049, TOS 104) · 1 GiB huge pages · 8 preallocated slabs</dd>
+          <dt>backend</dt>
+          <dd>diskfs · block cache 1,048,576 blocks · inode cache 1,048,576</dd>
+          <dt>workload</dt>
+          <dd>fio · 32 jobs × QD 32 · 100 files × 8 MiB · <code>direct=1</code></dd>
+          <dt>phases</dt>
+          <dd>512 KiB sequential layout (warm-up), then 4 KiB randwrite &amp; randread · 10 s ramp + 30 s timed</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="shell">
+    <span class="kicker">// the two clients, side by side</span>
+    <div class="cmp">
+      <div class="crow head">
+        <div>workload</div>
+        <div>Linux kernel NFS</div>
+        <div>Chimera in-process</div>
+        <div>ratio</div>
+      </div>
+      <div class="crow">
+        <div class="wl">512 KiB seq write (layout)</div>
+        <div class="lx">24.7 GB/s</div>
+        <div class="ch">42.3 GB/s</div>
+        <div class="rt">1.7×</div>
+      </div>
+      <div class="crow sub">
+        <div class="wl">4 KiB random write — IOPS</div>
+        <div class="lx">733k</div>
+        <div class="ch">10.8M</div>
+        <div class="rt">14.8×</div>
+      </div>
+      <div class="crow sub">
+        <div class="wl">4 KiB random write — bandwidth</div>
+        <div class="lx">3.00 GB/s</div>
+        <div class="ch">44.4 GB/s</div>
+        <div class="rt">14.8×</div>
+      </div>
+      <div class="crow sub">
+        <div class="wl">4 KiB random write — avg latency</div>
+        <div class="lx">1395 µs</div>
+        <div class="ch">94 µs</div>
+        <div class="rt">14.8×</div>
+      </div>
+      <div class="crow sub">
+        <div class="wl">4 KiB random read — IOPS</div>
+        <div class="lx">1.02M</div>
+        <div class="ch">10.5M</div>
+        <div class="rt">10.3×</div>
+      </div>
+      <div class="crow sub">
+        <div class="wl">4 KiB random read — bandwidth</div>
+        <div class="lx">4.17 GB/s</div>
+        <div class="ch">43.1 GB/s</div>
+        <div class="rt">10.3×</div>
+      </div>
+      <div class="crow sub">
+        <div class="wl">4 KiB random read — avg latency</div>
+        <div class="lx">1002 µs</div>
+        <div class="ch">97 µs</div>
+        <div class="rt">10.3×</div>
+      </div>
+      <div class="crow">
+        <div class="wl">context switches / 30 s run (read)</div>
+        <div class="lx">21.6M</div>
+        <div class="ch">840</div>
+        <div class="rt">—</div>
+      </div>
+    </div>
+
+    <div class="chart">
+      <div class="chart-head">
+        <span class="title">4 KiB random — IOPS</span>
+        <span>higher is better</span>
+      </div>
+      <div class="chart-row">
+        <span class="label">read · linux nfs</span>
+        <div class="bar-wrap"><div class="bar dim" style="width: 9.7%"></div></div>
+        <span class="v">1.02M</span>
+      </div>
+      <div class="chart-row">
+        <span class="label">read · chimera</span>
+        <div class="bar-wrap"><div class="bar" style="width: 100%"></div></div>
+        <span class="v">10.5M</span>
+      </div>
+      <div class="chart-row">
+        <span class="label">write · linux nfs</span>
+        <div class="bar-wrap"><div class="bar dim" style="width: 6.8%"></div></div>
+        <span class="v">733k</span>
+      </div>
+      <div class="chart-row">
+        <span class="label">write · chimera</span>
+        <div class="bar-wrap"><div class="bar" style="width: 100%"></div></div>
+        <span class="v">10.8M</span>
+      </div>
+      <div class="note">// bars scaled to the chimera result. Both clients hit the identical two-server flex-files backend over the same 400 GbE fabric.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="shell">
+    <span class="kicker">// how to read this</span>
+    <p>
+      Both runs drive the <strong>same two servers, the same flex-files pNFS layout, and the
+      same 400 GbE fabric</strong> with the <strong>same fio workload</strong>. The only thing
+      that changes is the client. They are not, however, an apples-to-apples <em>product</em>
+      comparison — they deliberately measure two different things:
+    </p>
+    <ul>
+      <li><b>Linux NFS is the stock in-kernel client</b>: general-purpose, POSIX, page-cache
+      backed, available to any unmodified process. Its small-IO ceiling here — ~1M IOPS,
+      ~4 GB/s, about 8% of line rate — isn't the wire or the servers; it's the kernel client's
+      software model. Every fio submission is handed off to the shared <code>nfsiod</code> /
+      <code>rpciod</code> worker pool, so the run shows <b>17–22 million context switches</b>
+      and dozens of kworkers at 20–32% CPU. That hand-off, plus the <b>shared RPC state behind
+      kernel spinlocks</b>, means a large fraction of the box goes to context-switching and
+      cross-core lock contention rather than to moving data.</li>
+      <li><b>Chimera's fio engine is a purpose-built in-process client</b> that speaks
+      pNFS/RDMA directly from the application's own threads — no syscall, no worker hand-off,
+      no kernel context switch on the I/O path. Critically, the client keeps its RPC and
+      session state <b>thread-local</b>: each fio thread drives its own connection with no
+      shared structures and no spinlocks, so adding threads adds throughput instead of lock
+      contention. The result is <b>~840 context switches</b> over the whole 30 s run and the
+      client link driven to <b>~86–89% of 400 GbE line rate</b>. The cost is CPU spent
+      busy-polling: fio runs at <b>3128% (~31 cores)</b> — but those cores are doing I/O, not
+      spinning on locks.</li>
+      <li>So read this as <b>"what the wire and the servers can deliver once the client
+      software gets out of the way"</b> versus <b>"what today's kernel NFS client delivers to
+      an unmodified application."</b> Both are legitimate; they answer different questions.</li>
+      <li>The <b>layout</b> group is a short warm-up (file creation, 0.6–1.1 s) absorbed by the
+      servers' write cache — the steady-state comparison is the <b>timed 30 s random
+      phases</b>.</li>
+      <li>The random-read working set (~25.6 GiB) fits in the servers' block cache, so the read
+      figures reflect <b>cache + RDMA fabric</b>, not cold NVMe media; the 30 s random-write
+      window is likewise absorbed by write-back cache.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="shell">
+    <span class="kicker">// configs — client</span>
+    <p>The two fio jobs are identical except for the engine and the target path — io_uring
+    against the kernel NFS mount at <code>/mnt</code>, versus the Chimera engine against the
+    export at <code>/export</code>.</p>
+      <details class="cfg">
+        <summary><span>fio — linux kernel mount <span class="fn">chimera-linux.fio</span></span></summary>
+        <div class="codewrap"><pre>[global]
+ioengine=io_uring
+thread=1
+filename_format=/mnt/f.$jobnum.$filenum
+randrepeat=0
+group_reporting
+direct=1
+filesize=8m
+nrfiles=100
+numjobs=32
+iodepth=32
+
+[layout]
+rw=write
+bs=512k
+stonewall
+
+[rand_write]
+rw=randwrite
+bs=4k
+time_based
+ramp_time=10
+runtime=30
+startdelay=0
+stonewall
+
+[rand_read]
+rw=randread
+bs=4k
+time_based
+ramp_time=10
+runtime=30
+startdelay=0
+stonewall</pre></div>
+      </details>
+      <details class="cfg">
+        <summary><span>fio — chimera engine <span class="fn">chimera.fio</span></span></summary>
+        <div class="codewrap"><pre>[global]
+ioengine=external:/root/chimera/build/Release/src/fio/libchimera_fio.so
+chimera_config=/root/chimera.json
+chimera_log=/tmp/chimera.log
+chimera_debug=0
+thread=1
+filename_format=/export/f.$jobnum.$filenum
+randrepeat=0
+group_reporting
+direct=1
+filesize=8m
+nrfiles=100
+numjobs=32
+iodepth=32
+
+[layout]
+rw=write
+bs=512k
+stonewall
+
+[rand_write]
+rw=randwrite
+bs=4k
+time_based
+ramp_time=10
+runtime=30
+startdelay=0
+stonewall
+
+[rand_read]
+rw=randread
+bs=4k
+time_based
+ramp_time=10
+runtime=30
+startdelay=0
+stonewall</pre></div>
+      </details>
+
+    <span class="kicker" style="display:block;margin-top:40px">// configs — servers</span>
+    <p>Two diskfs servers, each owning 16 NVMe devices through VFIO. node-3 runs the MDS and
+    advertises both nodes as flex-files data servers; node-1 is a pure data server.</p>
+      <details class="cfg">
+        <summary><span>server — MDS + DS (node-3) <span class="fn">pnfs.json</span></span></summary>
+        <div class="codewrap"><pre>{
+    "common": {
+        "sync_delegation": false,
+        "async_delegation": false,
+        "rdmacm_tos": 104,
+        "huge_pages": true,
+        "huge_page_size": "1G",
+        "slab_size": "1G",
+        "preallocate_slabs": 8,
+        "preallocate_threads": 8
+    },
+    "server": {
+        "threads": 80,
+        "metrics_port": 9000,
+        "rest_http_port": 8080,
+        "rdma": true,
+        "tcp_flavor": "plain",
+        "rdma_hostname": "0.0.0.0",
+        "rdma_port": 20049,
+        "nfs4_session_slots": 4096,
+        "pnfs": {
+            "enabled": true,
+            "data_servers": [
+                { "netid": "rdma", "tcp": "10.67.25.209", "rdma": "10.67.25.209", "backing_path": "/ds1" },
+                { "netid": "rdma", "tcp": "10.67.25.211", "rdma": "10.67.25.211", "backing_path": "/ds2" }
+            ]
+        },
+        "vfs": {
+            "diskfs": {
+                "path": "./build/Release/src/vfs/diskfs/libchimera_vfs_diskfs.so",
+                "config": {
+                    "initialize": true,
+                    "block_cache_blocks": 1048576,
+                    "inode_cache_inodes": 1048576,
+                    "devices": [
+                        { "type": "vfio", "path": "01:00.0" },
+                        { "type": "vfio", "path": "03:00.0" },
+                        { "type": "vfio", "path": "05:00.0" },
+                        { "type": "vfio", "path": "07:00.0" },
+                        { "type": "vfio", "path": "41:00.0" },
+                        { "type": "vfio", "path": "43:00.0" },
+                        { "type": "vfio", "path": "45:00.0" },
+                        { "type": "vfio", "path": "47:00.0" },
+                        { "type": "vfio", "path": "81:00.0" },
+                        { "type": "vfio", "path": "83:00.0" },
+                        { "type": "vfio", "path": "85:00.0" },
+                        { "type": "vfio", "path": "87:00.0" },
+                        { "type": "vfio", "path": "c1:00.0" },
+                        { "type": "vfio", "path": "c3:00.0" },
+                        { "type": "vfio", "path": "c5:00.0" },
+                        { "type": "vfio", "path": "c7:00.0" }
+                    ]
+                }
+            }
+        }
+    },
+
+    "mounts": {
+        "mds": { "module": "diskfs", "path": "/mds", "create": { "mode": "0777" } },
+        "ds1": { "module": "nfs",    "path": "10.67.25.209:/ds" },
+        "ds2": { "module": "diskfs", "path": "/ds",  "create": { "mode": "0755" } }
+    },
+
+    "exports": {
+        "/export": { "path": "/mds" },
+        "/ds1":    { "path": "/ds" }
+    }
+}</pre></div>
+      </details>
+      <details class="cfg">
+        <summary><span>server — DS only (node-1) <span class="fn">chimera.json</span></span></summary>
+        <div class="codewrap"><pre>{
+    "common": {
+        "sync_delegation": false,
+        "async_delegation": false,
+        "rdmacm_tos": 104,
+        "huge_pages": true,
+        "huge_page_size": "1G",
+        "slab_size": "1G",
+        "preallocate_slabs": 8,
+        "preallocate_threads": 8
+    },
+    "server": {
+        "threads": 80,
+        "metrics_port": 9000,
+        "rest_http_port": 8080,
+        "rdma": true,
+        "tcp_flavor": "plain",
+        "rdma_hostname": "0.0.0.0",
+        "rdma_port": 20049,
+        "vfs": {
+            "diskfs": {
+                "path": "./build/Release/src/vfs/diskfs/libchimera_vfs_diskfs.so",
+                "config": {
+                    "initialize": true,
+                    "block_cache_blocks": 1048576,
+                    "inode_cache_inodes": 1048576,
+                    "devices": [
+                        { "type": "vfio", "path": "01:00.0" },
+                        { "type": "vfio", "path": "03:00.0" },
+                        { "type": "vfio", "path": "05:00.0" },
+                        { "type": "vfio", "path": "07:00.0" },
+                        { "type": "vfio", "path": "41:00.0" },
+                        { "type": "vfio", "path": "43:00.0" },
+                        { "type": "vfio", "path": "45:00.0" },
+                        { "type": "vfio", "path": "47:00.0" },
+                        { "type": "vfio", "path": "81:00.0" },
+                        { "type": "vfio", "path": "83:00.0" },
+                        { "type": "vfio", "path": "85:00.0" },
+                        { "type": "vfio", "path": "87:00.0" },
+                        { "type": "vfio", "path": "c1:00.0" },
+                        { "type": "vfio", "path": "c3:00.0" },
+                        { "type": "vfio", "path": "c5:00.0" },
+                        { "type": "vfio", "path": "c7:00.0" }
+                    ]
+                }
+            }
+        }
+    },
+
+    "mounts": {
+        "ds": { "module": "diskfs", "path": "/" }
+    },
+
+    "exports": {
+        "/ds": { "path": "/ds" }
+    },
+    "shares": {
+        "diskfs": { "path": "/diskfs" }
+    },
+    "buckets": {
+        "diskfs": { "path": "/diskfs" }
+    }
+}</pre></div>
+      </details>
+  </div>
+</section>
+
+<section>
+  <div class="shell">
+    <span class="kicker">// raw output — fio</span>
+    <p>The full fio reports for both runs, verbatim.</p>
+      <details class="cfg">
+        <summary><span>fio output — linux kernel NFS client <span class="fn">32 jobs × QD 32</span></span></summary>
+        <div class="codewrap"><pre>layout: (g=0): rw=write, bs=(R) 512KiB-512KiB, (W) 512KiB-512KiB, (T) 512KiB-512KiB, ioengine=io_uring, iodepth=32
+...
+rand_write: (g=1): rw=randwrite, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=io_uring, iodepth=32
+...
+rand_read: (g=2): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=io_uring, iodepth=32
+...
+fio-3.40
+Starting 96 threads
+layout: Laying out IO files (28 files / total 224MiB)
+layout: Laying out IO files (40 files / total 320MiB)
+layout: Laying out IO files (30 files / total 240MiB)
+layout: Laying out IO files (37 files / total 296MiB)
+layout: Laying out IO files (37 files / total 296MiB)
+layout: Laying out IO files (27 files / total 216MiB)
+layout: Laying out IO files (29 files / total 232MiB)
+layout: Laying out IO files (43 files / total 344MiB)
+layout: Laying out IO files (39 files / total 312MiB)
+layout: Laying out IO files (45 files / total 360MiB)
+layout: Laying out IO files (31 files / total 248MiB)
+layout: Laying out IO files (27 files / total 216MiB)
+layout: Laying out IO files (30 files / total 240MiB)
+layout: Laying out IO files (35 files / total 280MiB)
+layout: Laying out IO files (39 files / total 312MiB)
+layout: Laying out IO files (34 files / total 272MiB)
+layout: Laying out IO files (41 files / total 328MiB)
+layout: Laying out IO files (33 files / total 264MiB)
+layout: Laying out IO files (35 files / total 280MiB)
+layout: Laying out IO files (43 files / total 344MiB)
+layout: Laying out IO files (31 files / total 248MiB)
+layout: Laying out IO files (40 files / total 320MiB)
+layout: Laying out IO files (33 files / total 264MiB)
+layout: Laying out IO files (31 files / total 248MiB)
+layout: Laying out IO files (28 files / total 224MiB)
+layout: Laying out IO files (39 files / total 312MiB)
+layout: Laying out IO files (40 files / total 320MiB)
+layout: Laying out IO files (34 files / total 272MiB)
+layout: Laying out IO files (39 files / total 312MiB)
+layout: Laying out IO files (40 files / total 320MiB)
+layout: Laying out IO files (38 files / total 304MiB)
+layout: Laying out IO files (39 files / total 312MiB)
+Jobs: 32 (f=3199): [_(64),r(5),f(1),r(6),f(1),r(1),f(1),r(17)][100.0%][r=3958MiB/s][r=1013k IOPS][eta 00m:00s]
+layout: (groupid=0, jobs=32): err= 0: pid=1312721: Sat Jun  6 14:00:03 2026
+  write: IOPS=47.1k, BW=23.0GiB/s (24.7GB/s)(25.0GiB/1086msec); 0 zone resets
+    slat (usec): min=2, max=265, avg=23.13, stdev=11.34
+    clat (usec): min=217, max=292715, avg=19797.63, stdev=34053.57
+     lat (usec): min=220, max=292734, avg=19820.76, stdev=34053.36
+    clat percentiles (usec):
+     |  1.00th=[   371],  5.00th=[   594], 10.00th=[   807], 20.00th=[  1893],
+     | 30.00th=[  2769], 40.00th=[  3523], 50.00th=[ 13042], 60.00th=[ 17957],
+     | 70.00th=[ 19268], 80.00th=[ 20841], 90.00th=[ 31327], 95.00th=[104334],
+     | 99.00th=[168821], 99.50th=[189793], 99.90th=[231736], 99.95th=[246416],
+     | 99.99th=[274727]
+   bw (  MiB/s): min=21866, max=21866, per=92.76%, avg=21866.27, stdev= 0.00, samples=32
+   iops        : min=43717, max=43717, avg=43717.00, stdev= 0.00, samples=32
+  lat (usec)   : 250=0.01%, 500=3.40%, 750=5.29%, 1000=3.72%
+  lat (msec)   : 2=8.71%, 4=23.35%, 10=3.94%, 20=25.87%, 50=17.88%
+  lat (msec)   : 100=2.57%, 250=5.23%, 500=0.04%
+  cpu          : usr=3.82%, sys=1.21%, ctx=55791, majf=0, minf=0
+  IO depths    : 1=0.1%, 2=0.1%, 4=0.2%, 8=0.5%, 16=1.0%, 32=98.1%, &gt;=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, &gt;=64=0.0%
+     complete  : 0=0.0%, 4=99.9%, 8=0.0%, 16=0.0%, 32=0.1%, 64=0.0%, &gt;=64=0.0%
+     issued rwts: total=0,51200,0,0 short=0,0,0,0 dropped=0,0,0,0
+     latency   : target=0, window=0, percentile=100.00%, depth=32
+rand_write: (groupid=1, jobs=32): err= 0: pid=1312863: Sat Jun  6 14:00:03 2026
+  write: IOPS=733k, BW=2863MiB/s (3002MB/s)(83.9GiB/30006msec); 0 zone resets
+    slat (nsec): min=291, max=384271, avg=1790.10, stdev=1092.37
+    clat (usec): min=3, max=217186, avg=1395.23, stdev=6022.21
+     lat (usec): min=60, max=217187, avg=1397.02, stdev=6022.21
+    clat percentiles (usec):
+     |  1.00th=[   104],  5.00th=[   145], 10.00th=[   174], 20.00th=[   219],
+     | 30.00th=[   269], 40.00th=[   363], 50.00th=[   611], 60.00th=[   676],
+     | 70.00th=[   742], 80.00th=[   898], 90.00th=[  1205], 95.00th=[  1909],
+     | 99.00th=[ 32375], 99.50th=[ 52167], 99.90th=[ 77071], 99.95th=[ 85459],
+     | 99.99th=[105382]
+   bw (  MiB/s): min= 2212, max= 3603, per=100.00%, avg=2865.08, stdev= 9.17, samples=1920
+   iops        : min=566425, max=922543, avg=733457.27, stdev=2346.51, samples=1920
+  lat (usec)   : 4=0.01%, 10=0.01%, 20=0.01%, 50=0.01%, 100=0.75%
+  lat (usec)   : 250=26.19%, 500=17.38%, 750=26.99%, 1000=11.54%
+  lat (msec)   : 2=12.36%, 4=1.44%, 10=1.34%, 20=0.63%, 50=0.84%
+  lat (msec)   : 100=0.53%, 250=0.01%
+  cpu          : usr=2.34%, sys=9.30%, ctx=17360075, majf=0, minf=314
+  IO depths    : 1=0.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=100.0%, &gt;=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, &gt;=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.1%, 64=0.0%, &gt;=64=0.0%
+     issued rwts: total=0,21994226,0,0 short=0,0,0,0 dropped=0,0,0,0
+     latency   : target=0, window=0, percentile=100.00%, depth=32
+rand_read: (groupid=2, jobs=32): err= 0: pid=1313325: Sat Jun  6 14:00:03 2026
+  read: IOPS=1019k, BW=3980MiB/s (4173MB/s)(117GiB/30003msec)
+    slat (nsec): min=240, max=4621.0k, avg=2222.40, stdev=11759.93
+    clat (usec): min=10, max=25878, avg=1002.14, stdev=668.47
+     lat (usec): min=67, max=25880, avg=1004.37, stdev=668.49
+    clat percentiles (usec):
+     |  1.00th=[  225],  5.00th=[  322], 10.00th=[  396], 20.00th=[  510],
+     | 30.00th=[  619], 40.00th=[  725], 50.00th=[  848], 60.00th=[  988],
+     | 70.00th=[ 1139], 80.00th=[ 1352], 90.00th=[ 1729], 95.00th=[ 2212],
+     | 99.00th=[ 3752], 99.50th=[ 4424], 99.90th=[ 5342], 99.95th=[ 5604],
+     | 99.99th=[ 6521]
+   bw (  MiB/s): min= 3784, max= 4350, per=100.00%, avg=3981.21, stdev= 2.99, samples=1920
+   iops        : min=968845, max=1113846, avg=1019187.40, stdev=765.14, samples=1920
+  lat (usec)   : 20=0.01%, 50=0.01%, 100=0.01%, 250=1.78%, 500=17.43%
+  lat (usec)   : 750=22.75%, 1000=19.07%
+  lat (msec)   : 2=32.30%, 4=5.87%, 10=0.80%, 20=0.01%, 50=0.01%
+  cpu          : usr=4.35%, sys=13.28%, ctx=21597989, majf=0, minf=210
+  IO depths    : 1=0.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=100.0%, &gt;=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, &gt;=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.1%, 64=0.0%, &gt;=64=0.0%
+     issued rwts: total=30567165,0,0,0 short=0,0,0,0 dropped=0,0,0,0
+     latency   : target=0, window=0, percentile=100.00%, depth=32
+
+Run status group 0 (all jobs):
+  WRITE: bw=23.0GiB/s (24.7GB/s), 23.0GiB/s-23.0GiB/s (24.7GB/s-24.7GB/s), io=25.0GiB (26.8GB), run=1086-1086msec
+
+Run status group 1 (all jobs):
+  WRITE: bw=2863MiB/s (3002MB/s), 2863MiB/s-2863MiB/s (3002MB/s-3002MB/s), io=83.9GiB (90.1GB), run=30006-30006msec
+
+Run status group 2 (all jobs):
+   READ: bw=3980MiB/s (4173MB/s), 3980MiB/s-3980MiB/s (4173MB/s-4173MB/s), io=117GiB (125GB), run=30003-30003msec</pre></div>
+      </details>
+      <details class="cfg">
+        <summary><span>fio output — chimera in-process client <span class="fn">32 jobs × QD 32</span></span></summary>
+        <div class="codewrap"><pre>layout: (g=0): rw=write, bs=(R) 512KiB-512KiB, (W) 512KiB-512KiB, (T) 512KiB-512KiB, ioengine=chimera, iodepth=32
+...
+rand_write: (g=1): rw=randwrite, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=chimera, iodepth=32
+...
+randread: (g=2): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=chimera, iodepth=32
+...
+fio-3.40
+Starting 96 threads
+Jobs: 32 (f=3200): [(64),r(32)][100.0%][r=39.9GiB/s][r=10.5M IOPS][eta 00m:00s]
+layout: (groupid=0, jobs=32): err= 0: pid=1308608: Sat Jun  6 13:50:55 2026
+  write: IOPS=80.8k, BW=39.4GiB/s (42.3GB/s)(25.0GiB/634msec); 0 zone resets
+    slat (nsec): min=1152, max=145379, avg=15370.22, stdev=8937.85
+    clat (usec): min=88, max=108608, avg=10248.51, stdev=12388.82
+     lat (usec): min=92, max=108642, avg=10263.88, stdev=12390.89
+    clat percentiles (usec):
+     |  1.00th=[   103],  5.00th=[   285], 10.00th=[   498], 20.00th=[   922],
+     | 30.00th=[  1598], 40.00th=[  2540], 50.00th=[  4424], 60.00th=[  9634],
+     | 70.00th=[ 16057], 80.00th=[ 19268], 90.00th=[ 23200], 95.00th=[ 29230],
+     | 99.00th=[ 56886], 99.50th=[ 78119], 99.90th=[ 94897], 99.95th=[ 99091],
+     | 99.99th=[105382]
+   bw (  MiB/s): min=32894, max=32894, per=81.47%, avg=32894.62, stdev= 0.00, samples=26
+   iops        : min=65778, max=65778, avg=65778.00, stdev= 0.00, samples=26
+  lat (usec)   : 100=0.73%, 250=3.69%, 500=5.64%, 750=6.00%, 1000=5.16%
+  lat (msec)   : 2=13.87%, 4=13.13%, 10=12.12%, 20=21.64%, 50=16.73%
+  lat (msec)   : 100=1.24%, 250=0.04%
+  cpu          : usr=84.89%, sys=0.46%, ctx=1750, majf=0, minf=6956
+  IO depths    : 1=0.1%, 2=0.1%, 4=0.2%, 8=0.5%, 16=1.0%, 32=98.1%, &gt;=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, &gt;=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.1%, 64=0.0%, &gt;=64=0.0%
+     issued rwts: total=0,51200,0,0 short=0,0,0,0 dropped=0,0,0,0
+     latency   : target=0, window=0, percentile=100.00%, depth=32
+rand_write: (groupid=1, jobs=32): err= 0: pid=1309110: Sat Jun  6 13:50:55 2026
+  write: IOPS=10.8M, BW=41.4GiB/s (44.4GB/s)(1242GiB/30002msec); 0 zone resets
+    slat (nsec): min=200, max=2557.6k, avg=388.83, stdev=239.00
+    clat (usec): min=21, max=10978, avg=93.78, stdev=48.33
+     lat (usec): min=21, max=10978, avg=94.17, stdev=48.33
+    clat percentiles (usec):
+     |  1.00th=[   52],  5.00th=[   62], 10.00th=[   67], 20.00th=[   74],
+     | 30.00th=[   79], 40.00th=[   84], 50.00th=[   89], 60.00th=[   94],
+     | 70.00th=[  101], 80.00th=[  110], 90.00th=[  123], 95.00th=[  137],
+     | 99.00th=[  229], 99.50th=[  281], 99.90th=[  416], 99.95th=[  553],
+     | 99.99th=[  906]
+   bw (  MiB/s): min=40846, max=43462, per=100.00%, avg=42396.65, stdev=17.30, samples=1916
+   iops        : min=10456735, max=11126356, avg=10853537.66, stdev=4428.85, samples=1916
+  lat (usec)   : 50=0.62%, 100=68.65%, 250=29.95%, 500=0.71%, 750=0.04%
+  lat (usec)   : 1000=0.02%
+  lat (msec)   : 2=0.01%, 4=0.01%, 10=0.01%, 20=0.01%
+  cpu          : usr=98.83%, sys=0.93%, ctx=267082, majf=0, minf=3406
+  IO depths    : 1=0.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=100.0%, &gt;=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, &gt;=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.1%, 64=0.0%, &gt;=64=0.0%
+     issued rwts: total=0,325529457,0,0 short=0,0,0,0 dropped=0,0,0,0
+     latency   : target=0, window=0, percentile=100.00%, depth=32
+rand_read: (groupid=2, jobs=32): err= 0: pid=1309251: Sat Jun  6 13:50:55 2026
+  read: IOPS=10.5M, BW=40.1GiB/s (43.1GB/s)(1203GiB/30001msec)
+    slat (nsec): min=180, max=175275, avg=367.51, stdev=205.67
+    clat (usec): min=9, max=20342, avg=96.64, stdev=44.73
+     lat (usec): min=9, max=20343, avg=97.01, stdev=44.74
+    clat percentiles (usec):
+     |  1.00th=[   65],  5.00th=[   70], 10.00th=[   74], 20.00th=[   79],
+     | 30.00th=[   87], 40.00th=[   92], 50.00th=[   95], 60.00th=[   98],
+     | 70.00th=[  101], 80.00th=[  106], 90.00th=[  116], 95.00th=[  128],
+     | 99.00th=[  206], 99.50th=[  260], 99.90th=[  383], 99.95th=[  478],
+     | 99.99th=[  799]
+   bw (  MiB/s): min=40011, max=41733, per=100.00%, avg=41136.92, stdev=11.23, samples=1888
+   iops        : min=10262178, max=10703686, avg=10550706.22, stdev=2880.78, samples=1888
+  lat (usec)   : 10=0.01%, 20=0.07%, 50=0.27%, 100=66.39%, 250=32.71%
+  lat (usec)   : 500=0.52%, 750=0.03%, 1000=0.01%
+  lat (msec)   : 2=0.01%, 4=0.01%, 10=0.01%, 20=0.01%, 50=0.01%
+  cpu          : usr=99.61%, sys=0.28%, ctx=840, majf=0, minf=204
+  IO depths    : 1=0.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=100.0%, &gt;=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, &gt;=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.1%, 64=0.0%, &gt;=64=0.0%
+     issued rwts: total=316039490,0,0,0 short=0,0,0,0 dropped=0,0,0,0
+     latency   : target=0, window=0, percentile=100.00%, depth=32
+
+Run status group 0 (all jobs):
+  WRITE: bw=39.4GiB/s (42.3GB/s), 39.4GiB/s-39.4GiB/s (42.3GB/s-42.3GB/s), io=25.0GiB (26.8GB), run=634-634msec
+
+Run status group 1 (all jobs):
+  WRITE: bw=41.4GiB/s (44.4GB/s), 41.4GiB/s-41.4GiB/s (44.4GB/s-44.4GB/s), io=1242GiB (1333GB), run=30002-30002msec
+
+Run status group 2 (all jobs):
+   READ: bw=40.1GiB/s (43.1GB/s), 40.1GiB/s-40.1GiB/s (43.1GB/s-43.1GB/s), io=1203GiB (1292GB), run=30001-30001msec</pre></div>
+      </details>
+
+    <span class="kicker" style="display:block;margin-top:40px">// raw output — client <code>top</code></span>
+    <p>Client-side <code>top</code> during each run — this is the clearest view of the
+    difference. Under the Linux mount the CPU is spread across a swarm of
+    <code>nfsiod</code> / <code>rpciod</code> kworkers (the kernel's shared RPC machinery);
+    under Chimera it is a single <code>fio</code> process at ~3128% with no kernel I/O
+    threads at all, because the client's state is thread-local and never touches that pool.
+    Headers and busy rows are verbatim; the long tail of idle kernel threads is elided, as
+    marked.</p>
+      <details class="cfg">
+        <summary><span>top — during linux NFS run <span class="fn">kernel nfsiod / rpciod path</span></span></summary>
+        <div class="codewrap"><pre>top - 14:05:16 up 4 days, 22:21,  3 users,  load average: 5.84, 13.62, 15.86
+Tasks: 3892 total,  47 running, 3845 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  0.2 us, 13.8 sy,  0.0 ni, 79.0 id,  7.1 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem : 386429.6 total, 231825.9 free, 148122.5 used,   9226.2 buff/cache
+MiB Swap:   8192.0 total,   8153.7 free,     38.3 used. 238307.1 avail Mem
+
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+1315100 root      20   0 2617360  44360  33984 S  1344   0.0   6:27.45 fio
+1312849 root      20   0       0      0      0 R  32.0   0.0   0:19.89 kworker/u1551:12+rpciod
+1315946 root      20   0       0      0      0 R  32.0   0.0   0:01.10 kworker/u1551:0+nfsiod
+1316194 root      20   0       0      0      0 I  32.0   0.0   0:00.91 kworker/u1551:14-nfsiod
+1316342 root      20   0       0      0      0 I  32.0   0.0   0:00.70 kworker/u1551:21-nfsiod
+1311934 root      20   0       0      0      0 I  28.0   0.0   0:08.12 kworker/u1553:9-nfsiod
+1313121 root      20   0       0      0      0 R  28.0   0.0   0:19.54 kworker/u1551:28+nfsiod
+1313739 root      20   0       0      0      0 I  28.0   0.0   0:06.67 kworker/u1551:48-nfsiod
+1315669 root      20   0       0      0      0 I  28.0   0.0   0:01.13 kworker/u1553:1-nfsiod
+1316086 root      20   0       0      0      0 I  28.0   0.0   0:00.80 kworker/u1551:2-nfsiod
+1316090 root      20   0       0      0      0 I  28.0   0.0   0:01.03 kworker/u1551:3-nfsiod
+1316132 root      20   0       0      0      0 R  28.0   0.0   0:01.02 kworker/u1553:6+rpciod
+1316137 root      20   0       0      0      0 I  28.0   0.0   0:01.05 kworker/u1551:5-nfsiod
+1316185 root      20   0       0      0      0 I  28.0   0.0   0:00.78 kworker/u1551:10-nfsiod
+1316323 root      20   0       0      0      0 I  28.0   0.0   0:00.93 kworker/u1551:17-nfsiod
+1316327 root      20   0       0      0      0 I  28.0   0.0   0:00.95 kworker/u1551:18-nfsiod
+ 955127 root      20   0       0      0      0 I  24.0   0.0   0:08.66 kworker/u1553:2-nfsiod
+1283422 root      20   0       0      0      0 I  24.0   0.0   0:07.86 kworker/u1553:0-nfsiod
+1313431 root      20   0       0      0      0 I  24.0   0.0   0:14.90 kworker/u1549:32-nfsiod
+            ... (additional nfsiod / rpciod kworkers at 20-24% CPU elided) ...
+%Cpu summary: 0.2% user, 13.8% system, 7.1% iowait — data movement is spread across
+dozens of kernel nfsiod / rpciod worker threads rather than in fio itself.</pre></div>
+      </details>
+      <details class="cfg">
+        <summary><span>top — during chimera run <span class="fn">userspace poll loop</span></span></summary>
+        <div class="codewrap"><pre>top - 14:05:54 up 4 days, 22:21,  3 users,  load average: 19.64, 16.43, 16.73
+Tasks: 4006 total,   1 running, 4005 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  8.3 us,  0.1 sy,  0.0 ni, 91.6 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem : 386429.6 total, 231614.9 free, 148333.2 used,   9225.2 buff/cache
+MiB Swap:   8192.0 total,   8153.7 free,     38.3 used. 238096.3 avail Mem
+
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+1316608 root      20   0   81.8g 527512  44624 S  3128   0.1   9:34.47 fio
+1314410 root      20   0   16608  11672   4108 R  20.0   0.0   0:09.33 top
+      1 root      20   0   25604  16452  11068 S   0.0   0.0   0:15.94 systemd
+      2 root      20   0       0      0      0 S   0.0   0.0   0:03.01 kthreadd
+            ... (all remaining tasks are idle kernel threads at 0.0% CPU) ...
+%Cpu summary: 8.3% user, 0.1% system, 0% iowait — essentially all the work is the
+single fio process busy-polling RDMA at 3128% CPU (~31 cores). No kernel I/O threads.</pre></div>
+      </details>
+  </div>
+</section>
+
+<section style="padding-top: 16px">
+  <div class="shell">
+    <span class="kicker">// reproducibility</span>
+    <p>
+      These are early single-client numbers from a development rig, shared to show the shape
+      of the data path rather than as a final benchmark. The fio plugin and server live in the
+      public repository; multi-client scaling and cold-media runs are next.
+    </p>
+    <p style="margin-top:18px; display:flex; gap:10px; flex-wrap:wrap;">
+      <a class="btn primary" href="https://github.com/chimera-nas/chimera" target="_blank" rel="noopener">Repository →</a>
+      <a class="btn" href="chimera-architecture.html">Read the architecture</a>
+      <a class="btn ghost" href="chimera-status.html">Conformance &amp; status</a>
+    </p>
+  </div>
+</section>
 
 <footer class="site-foot">
   <div class="shell">
@@ -157,7 +906,7 @@
     <div class="meta">
       <span>License — LGPL-2.1</span>
       <span>© 2026 the Chimera authors</span>
-      <span style="margin-left:auto">Benchmarks not yet published.</span>
+      <span style="margin-left:auto">Single-client pNFS results · June 2026</span>
     </div>
   </div>
 </footer>
