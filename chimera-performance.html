@@ -257,9 +257,10 @@ details.rawopen .codewrap { max-height: none; overflow-x: auto; }
   <div class="shell">
     <span class="kicker">// notes on the comparison</span>
     <p>
-      Both runs use the same servers, layout, fabric, and fio workload; only the client
-      differs. The two clients are built differently, so this is not an apples-to-apples
-      comparison of the same software:
+      Both runs use the same servers, layout, fabric, and fio workload, and both execute on
+      the same physical client machine — same CPU, NICs, and hardware. The only thing that
+      changes is the client software stack, so this is not an apples-to-apples comparison of
+      the same software:
     </p>
     <ul>
       <li>The Linux side is the stock in-kernel NFS client. fio submissions go through the
