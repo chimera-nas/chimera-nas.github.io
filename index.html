@@ -256,19 +256,17 @@
       </div>
       <h1>User-space NAS without compromise</h1>
       <p class="lede">
-        chimeraproject is two C libraries for building storage systems in user space.
+        chimeraproject is two LGPL libraries for building storage systems in user space.
         <b><a href="libevpl.html">libevpl</a></b> is the I/O runtime: a sockets-style API
         that can run over kernel sockets, io_uring, RDMA, or XLIO, picked at configuration
         time rather than in code. <b><a href="chimera.html">chimera</a></b> is a
         multi-protocol NAS stack built on it — clients and servers for NFS, SMB, and S3 —
         all going through a single VFS, so a storage backend implements one interface
         instead of three separate protocol gateways. The aim is for user space to be a
-        practical place to build high-performance distributed storage, not a slower one.
+        practical place to build high-performance distributed storage.
       </p>
       <div class="meta">
-        <span><b>license</b> — lgpl-2.1</span>
         <span><b>language</b> — C</span>
-        <span><b>repos</b> — <a href="https://github.com/chimera-nas" target="_blank" rel="noopener">github.com/chimera-nas</a></span>
       </div>
     </div>
   </section>
@@ -281,7 +279,6 @@
         <a class="proj" href="chimera.html">
           <div class="top">
             <span class="pid">01 / chimera</span>
-            <span class="pstatus">experimental</span>
           </div>
           <h2>chimera</h2>
           <div class="tag">protocol-native NAS · user space · async · zero-copy</div>
@@ -310,7 +307,6 @@
         <a class="proj" href="libevpl.html">
           <div class="top">
             <span class="pid">02 / libevpl</span>
-            <span class="pstatus">pre-stable</span>
           </div>
           <h2>libevpl</h2>
           <div class="tag">async i/o runtime · event + poll</div>
