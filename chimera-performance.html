@@ -61,6 +61,18 @@ section { padding: 56px 0; }
 .cmp .crow .ch { color: var(--fg); }
 .cmp .crow .rt { color: var(--accent); font-weight: 500; }
 
+/* latency-by-layer table */
+.lat { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-top: 20px; }
+.lat + .lat { margin-top: 16px; }
+.lat .lrow { display: grid; grid-template-columns: 1.8fr 1fr 1fr 1fr; border-bottom: 1px solid var(--border); }
+.lat .lrow:last-child { border-bottom: 0; }
+.lat .lrow.head { background: var(--surface); }
+.lat .lrow.device { background: color-mix(in oklab, var(--accent) 5%, var(--bg)); }
+.lat .lrow > div { padding: 11px 16px; font-family: var(--font-mono); font-size: 13px; color: var(--fg-soft); }
+.lat .lrow.head > div { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); }
+.lat .lrow .layer { color: var(--fg); }
+.lat .lrow.device .layer { color: var(--accent); }
+
 /* bar chart */
 .chart { margin-top: 24px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); padding: 24px; }
 .chart .chart-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); }
@@ -135,57 +147,17 @@ details.cfg[open] > summary::after { content: "\25BE"; }
 <section class="page-hero">
   <div class="shell">
     <span class="kicker">Performance · §</span>
-    <h1>One backend, <em>two ways</em> to drive it</h1>
+    <h1>pNFS, two clients</h1>
     <p class="lede">
-      A first look at Chimera's pNFS data path. Two diskfs storage servers in a flex-files
-      pNFS layout, one client, and the <b>exact same fio workload</b> run two ways: once
-      through the stock Linux kernel NFS mount, and once through Chimera's in-process fio
-      engine that speaks pNFS over RDMA directly from the application. Same servers, same
-      fabric — the client is the only variable.
+      Two diskfs storage servers in a flex-files pNFS layout, one client. The same fio
+      workload is run two ways: through the stock Linux kernel NFS mount, and through
+      Chimera's in-process fio engine, which talks pNFS over RDMA from the application. The
+      servers, fabric, and workload are identical in both runs; only the client differs.
     </p>
     <div class="disclaimer">
-      <b>Note:</b> single-client results from a development rig (June 2026), not an audited
-      benchmark. Every number below is taken straight from the fio output, which is
-      reproduced in full — along with the client and server configs — so the runs can be
-      repeated. Treat them as directional.
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="shell">
-    <span class="kicker">// headline numbers — 4 KiB random, steady state</span>
-    <div class="numbers">
-      <div class="nstat">
-        <div class="lab">RANDOM READ · chimera client</div>
-        <div class="val">10.5<span class="unit">M IOPS</span></div>
-        <div class="sub">In-process pNFS over RDMA — 43.1 GB/s, ≈ 86% of the client's 400 GbE line rate. 32 jobs × QD 32.</div>
-      </div>
-      <div class="nstat">
-        <div class="lab">RANDOM WRITE · chimera client</div>
-        <div class="val">10.8<span class="unit">M IOPS</span></div>
-        <div class="sub">44.4 GB/s sustained over the 30 s timed window, ~94 µs average latency.</div>
-      </div>
-      <div class="nstat">
-        <div class="lab">RANDOM READ · Linux NFS client</div>
-        <div class="val">1.02<span class="unit">M IOPS</span></div>
-        <div class="sub">Stock in-kernel NFS client, identical servers and fabric. 3980 MiB/s, ~1.0 ms average latency.</div>
-      </div>
-      <div class="nstat">
-        <div class="lab">RANDOM-IO SPEEDUP</div>
-        <div class="val">10–15<span class="unit">×</span></div>
-        <div class="sub">Chimera's in-process client over the Linux kernel NFS client — same workload, same two-server backend.</div>
-      </div>
-      <div class="nstat">
-        <div class="lab">CLIENT LINK UTILISATION</div>
-        <div class="val">86<span class="unit">%</span></div>
-        <div class="sub">Chimera random read drives 344 of 400 Gbps across the client's 2×200 GbE; the kernel path reaches ~33 Gbps (8%).</div>
-      </div>
-      <div class="nstat">
-        <div class="lab">CONTEXT SWITCHES · 30 s read run</div>
-        <div class="val">840</div>
-        <div class="sub">Chimera's userspace poll loop, versus 21.6 M for the kernel nfsiod / rpciod path on the same test.</div>
-      </div>
+      <b>Note:</b> single-client results from a development rig, June 2026. The numbers come
+      straight from the fio output, which is reproduced in full below along with the client
+      and server configs, so the runs can be repeated.
     </div>
   </div>
 </section>
@@ -283,73 +255,96 @@ details.cfg[open] > summary::after { content: "\25BE"; }
         <div class="rt">—</div>
       </div>
     </div>
-
-    <div class="chart">
-      <div class="chart-head">
-        <span class="title">4 KiB random — IOPS</span>
-        <span>higher is better</span>
-      </div>
-      <div class="chart-row">
-        <span class="label">read · linux nfs</span>
-        <div class="bar-wrap"><div class="bar dim" style="width: 9.7%"></div></div>
-        <span class="v">1.02M</span>
-      </div>
-      <div class="chart-row">
-        <span class="label">read · chimera</span>
-        <div class="bar-wrap"><div class="bar" style="width: 100%"></div></div>
-        <span class="v">10.5M</span>
-      </div>
-      <div class="chart-row">
-        <span class="label">write · linux nfs</span>
-        <div class="bar-wrap"><div class="bar dim" style="width: 6.8%"></div></div>
-        <span class="v">733k</span>
-      </div>
-      <div class="chart-row">
-        <span class="label">write · chimera</span>
-        <div class="bar-wrap"><div class="bar" style="width: 100%"></div></div>
-        <span class="v">10.8M</span>
-      </div>
-      <div class="note">// bars scaled to the chimera result. Both clients hit the identical two-server flex-files backend over the same 400 GbE fabric.</div>
-    </div>
   </div>
 </section>
 
 <section>
   <div class="shell">
-    <span class="kicker">// how to read this</span>
+    <span class="kicker">// notes on the comparison</span>
     <p>
-      Both runs drive the <strong>same two servers, the same flex-files pNFS layout, and the
-      same 400 GbE fabric</strong> with the <strong>same fio workload</strong>. The only thing
-      that changes is the client. They are not, however, an apples-to-apples <em>product</em>
-      comparison — they deliberately measure two different things:
+      Both runs use the same servers, layout, fabric, and fio workload; only the client
+      differs. The two clients are built differently, so this is not an apples-to-apples
+      comparison of the same software:
     </p>
     <ul>
-      <li><b>Linux NFS is the stock in-kernel client</b>: general-purpose, POSIX, page-cache
-      backed, available to any unmodified process. Its small-IO ceiling here — ~1M IOPS,
-      ~4 GB/s, about 8% of line rate — isn't the wire or the servers; it's the kernel client's
-      software model. Every fio submission is handed off to the shared <code>nfsiod</code> /
-      <code>rpciod</code> worker pool, so the run shows <b>17–22 million context switches</b>
-      and dozens of kworkers at 20–32% CPU. That hand-off, plus the <b>shared RPC state behind
-      kernel spinlocks</b>, means a large fraction of the box goes to context-switching and
-      cross-core lock contention rather than to moving data.</li>
-      <li><b>Chimera's fio engine is a purpose-built in-process client</b> that speaks
-      pNFS/RDMA directly from the application's own threads — no syscall, no worker hand-off,
-      no kernel context switch on the I/O path. Critically, the client keeps its RPC and
-      session state <b>thread-local</b>: each fio thread drives its own connection with no
-      shared structures and no spinlocks, so adding threads adds throughput instead of lock
-      contention. The result is <b>~840 context switches</b> over the whole 30 s run and the
-      client link driven to <b>~86–89% of 400 GbE line rate</b>. The cost is CPU spent
-      busy-polling: fio runs at <b>3128% (~31 cores)</b> — but those cores are doing I/O, not
-      spinning on locks.</li>
-      <li>So read this as <b>"what the wire and the servers can deliver once the client
-      software gets out of the way"</b> versus <b>"what today's kernel NFS client delivers to
-      an unmodified application."</b> Both are legitimate; they answer different questions.</li>
-      <li>The <b>layout</b> group is a short warm-up (file creation, 0.6–1.1 s) absorbed by the
-      servers' write cache — the steady-state comparison is the <b>timed 30 s random
-      phases</b>.</li>
+      <li>The Linux side is the stock in-kernel NFS client. fio submissions go through the
+      shared <code>nfsiod</code> / <code>rpciod</code> worker pool, and the read run shows
+      21.6M context switches with many kworkers at 20–32% CPU. The limit here is that per-RPC
+      kernel overhead and shared-state lock contention, not the network or the servers — it
+      reaches ~4 GB/s, about 8% of the 400 GbE link.</li>
+      <li>The Chimera side is an in-process client that talks pNFS/RDMA from fio's own threads.
+      Connection and RPC state are thread-local, so there is no worker hand-off and no shared
+      locks; the read run shows 840 context switches. fio uses ~31 cores busy-polling RDMA and
+      reaches ~43 GB/s, about 86% of the link.</li>
+      <li>The layout phase is file creation (0.6–1.1 s, absorbed by the servers' write cache).
+      The steady-state numbers are the timed 30 s random phases.</li>
       <li>The random-read working set (~25.6 GiB) fits in the servers' block cache, so the read
-      figures reflect <b>cache + RDMA fabric</b>, not cold NVMe media; the 30 s random-write
-      window is likewise absorbed by write-back cache.</li>
+      numbers reflect cache plus fabric rather than NVMe media; the 30 s write window is
+      likewise absorbed by write-back cache.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="shell">
+    <span class="kicker">// where the latency goes — client vs block device</span>
+    <p>
+      The servers export a per-operation block-I/O latency histogram (libevpl, via
+      Prometheus). Aggregated across all 32 NVMe devices on the two servers, that gives the
+      raw device latency for the same 4 KiB random workload. Device latency does not depend
+      on which client drove the I/O, so it sits as a fixed backdrop under both client runs;
+      the fio client percentiles below are what each client added on top.
+    </p>
+
+    <div class="lat">
+      <div class="lrow head">
+        <div>4 KiB random read</div><div>p50</div><div>mean</div><div>p99</div>
+      </div>
+      <div class="lrow device">
+        <div class="layer">block device — NVMe</div><div>~78 µs</div><div>~73 µs</div><div>~192 µs</div>
+      </div>
+      <div class="lrow">
+        <div class="layer">chimera in-process client</div><div>95 µs</div><div>97 µs</div><div>206 µs</div>
+      </div>
+      <div class="lrow">
+        <div class="layer">Linux kernel NFS client</div><div>848 µs</div><div>1002 µs</div><div>3752 µs</div>
+      </div>
+    </div>
+
+    <div class="lat">
+      <div class="lrow head">
+        <div>4 KiB random write</div><div>p50</div><div>mean</div><div>p99</div>
+      </div>
+      <div class="lrow device">
+        <div class="layer">block device — NVMe</div><div>~12 µs</div><div>~18 µs</div><div>~100 µs</div>
+      </div>
+      <div class="lrow">
+        <div class="layer">chimera in-process client</div><div>89 µs</div><div>94 µs</div><div>229 µs</div>
+      </div>
+      <div class="lrow">
+        <div class="layer">Linux kernel NFS client</div><div>611 µs</div><div>1395 µs</div><div>32375 µs</div>
+      </div>
+    </div>
+
+    <p>
+      For reads the chimera client lands about 20 µs above the device across the whole
+      distribution (p50 +17 µs, p99 +14 µs) — a read is close to a device passthrough plus
+      the RDMA/pNFS round trip. The Linux client adds roughly 770 µs at p50 to the same
+      device, so the storage is under 10% of what it sees. For writes the chimera gap is
+      larger, about 77 µs at p50, because a client write is not a single block op: the server
+      turns it into a logged transaction (intent-log write, data write, tail push), so this
+      figure is the durable write path plus transport, not transport alone.
+    </p>
+    <ul>
+      <li>The read comparison is close to one-to-one: device reads (~345M) track client reads,
+      since the working set misses the block cache, so the ~20 µs gap is genuinely transport
+      and protocol.</li>
+      <li>The write histogram is dominated by the small 4 KiB writes and intent-log traffic;
+      the 512 KiB layout writes decompose into many similar-sized block ops, so they do not
+      form a distinct slow mode.</li>
+      <li>These counters are cumulative since the servers were redeployed, so they include the
+      layout phase and both client runs. That is fine for the device backdrop, which is
+      client-independent, but the figures are not scoped to a single phase.</li>
     </ul>
   </div>
 </section>
@@ -794,13 +789,10 @@ Run status group 2 (all jobs):
       </details>
 
     <span class="kicker" style="display:block;margin-top:40px">// raw output — client <code>top</code></span>
-    <p>Client-side <code>top</code> during each run — this is the clearest view of the
-    difference. Under the Linux mount the CPU is spread across a swarm of
-    <code>nfsiod</code> / <code>rpciod</code> kworkers (the kernel's shared RPC machinery);
-    under Chimera it is a single <code>fio</code> process at ~3128% with no kernel I/O
-    threads at all, because the client's state is thread-local and never touches that pool.
-    Headers and busy rows are verbatim; the long tail of idle kernel threads is elided, as
-    marked.</p>
+    <p>Client-side <code>top</code> during each run. Under the Linux mount the CPU is spread
+    across <code>nfsiod</code> / <code>rpciod</code> kworkers; under Chimera it is a single
+    <code>fio</code> process busy-polling, with no kernel I/O threads. Headers and busy rows
+    are verbatim; the long tail of idle kernel threads is elided, as marked.</p>
       <details class="cfg">
         <summary><span>top — during linux NFS run <span class="fn">kernel nfsiod / rpciod path</span></span></summary>
         <div class="codewrap"><pre>top - 14:05:16 up 4 days, 22:21,  3 users,  load average: 5.84, 13.62, 15.86
@@ -857,9 +849,8 @@ single fio process busy-polling RDMA at 3128% CPU (~31 cores). No kernel I/O thr
   <div class="shell">
     <span class="kicker">// reproducibility</span>
     <p>
-      These are early single-client numbers from a development rig, shared to show the shape
-      of the data path rather than as a final benchmark. The fio plugin and server live in the
-      public repository; multi-client scaling and cold-media runs are next.
+      These are early single-client numbers from a development rig. The fio plugin and server
+      live in the public repository; multi-client scaling and cold-media runs are next.
     </p>
     <p style="margin-top:18px; display:flex; gap:10px; flex-wrap:wrap;">
       <a class="btn primary" href="https://github.com/chimera-nas/chimera" target="_blank" rel="noopener">Repository →</a>
