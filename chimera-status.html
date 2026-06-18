@@ -298,8 +298,9 @@
       The NFSv3, NFSv4 (4.0 / 4.1 / 4.2), and SMB2/3 servers implement the full data-path
       and metadata operation set and pass real-Linux-client conformance suites. The data
       path — read, write, metadata, locking — is mature and well exercised.
-      Reboot-recovery state persistence, Kerberos for NFS, and several advanced protocol
-      features are either present-but-incomplete or absent. Those gaps are listed below.
+      NFSv4 reboot-recovery state and SMB durable handles now persist across restarts, and
+      NFSv3 gained NSM/statd lock recovery. Kerberos for NFS and several advanced protocol
+      features remain present-but-incomplete or absent. Those gaps are listed below.
     </p>
   </div>
 </section>
@@ -327,26 +328,27 @@
         <span class="badge mature"><span class="led"></span>Mature core</span>
       </div>
       <p>Single COMPOUND handler across all three minor versions. Sessions, state, ACLs,
-      xattrs, delegations, and pNFS (flex-files). Reboot-recovery persistence is
-      framework-only.</p>
+      xattrs, delegations, and pNFS (flex-files). Reboot-recovery records and the reply
+      cache now persist to the VFS — clients and state survive a restart.</p>
     </div>
     <div class="scard">
       <div class="top">
         <span class="name">SMB2 · SMB3</span>
         <span class="badge broad"><span class="led"></span>Broad coverage</span>
       </div>
-      <p>All 19 commands, dialects through 3.1.1, signing, encryption, leases, durable
-      handles, change-notify, ACLs, Kerberos. Several advanced features ship disabled by
+      <p>All 19 commands, dialects through 3.1.1, signing, encryption, oplocks &amp; leases
+      (file and directory), durable / persistent handles, change-notify, transport
+      compression, copy-offload, ACLs, Kerberos. Several advanced features ship disabled by
       default.</p>
     </div>
     <div class="scard">
       <div class="top">
         <span class="name">S3</span>
-        <span class="badge partial"><span class="led"></span>Object path only</span>
+        <span class="badge partial"><span class="led"></span>Objects + buckets</span>
       </div>
-      <p>Object data path works — GET/PUT/HEAD/DELETE, ranged reads, full multipart,
-      SigV4/V2. Bucket management, versioning, ACLs, SSE, and conditional requests are
-      absent.</p>
+      <p>Object data path — GET/PUT/HEAD/DELETE, ranged reads, full multipart, SigV4/V2 —
+      plus dynamic bucket create/delete/list and paginated prefix/delimiter listing.
+      Versioning, ACLs, SSE, and conditional requests are absent.</p>
     </div>
   </div>
 
@@ -389,17 +391,18 @@
           <li>All <b>21 procedures</b> implemented, no stubs</li>
           <li><b>MOUNT v3</b> — MNT, DUMP, UMNT, EXPORT, in-memory mount table</li>
           <li><b>NLM v4</b> advisory byte-range locking through the unified VFS lease layer, with cross-protocol conflict detection</li>
+          <li><b>NSM / statd</b> (prog 100024) — crash-recovery lock reclaim, with a KV-persisted monitor list and state number</li>
+          <li>NLM lock state <b>persisted per-host</b> across a server restart</li>
           <li>Write stability &amp; <code>COMMIT</code> with per-instance write verifier</li>
           <li>Weak cache consistency (wcc) pre/post attrs</li>
-          <li>TCP and RPC-over-RDMA transports</li>
-          <li>Built-in portmap / rpcbind</li>
+          <li><b>Duplicate Request Cache</b> (v3 path, config-gated)</li>
+          <li>TCP and RPC-over-RDMA transports; built-in portmap / rpcbind</li>
         </ul>
       </div>
       <div class="col partial">
         <h4><span class="mark">~</span>Partial</h4>
         <ul>
-          <li>Blocking locks: cross-protocol conflicts ride the wait path; same-protocol contention returns <code>DENIED</code> (no async GRANTED queue)</li>
-          <li>Lock state is <b>in-memory only</b> — does not survive a server restart</li>
+          <li>Blocking locks: cross-protocol conflicts ride the wait path; same-protocol contention returns <code>DENIED</code> (no async GRANTED callback queue)</li>
           <li>SHARE / UNSHARE (DOS share modes) accepted but not enforced</li>
           <li>EXPORT access control: advertised to all clients, no per-client restriction</li>
         </ul>
@@ -407,10 +410,10 @@
       <div class="col missing">
         <h4><span class="mark">−</span>Missing</h4>
         <ul>
-          <li><b>NSM / statd</b> — no crash-recovery lock-reclaim notification</li>
           <li><b>RPCSEC_GSS / Kerberos</b> — non-AUTH_SYS flavors fall back to anonymous</li>
+          <li>Per-export <code>root_squash</code> / per-client access control</li>
+          <li>NFSv3 ACL sideband protocol (prog 100227)</li>
           <li>UDP transport (TCP / RDMA only)</li>
-          <li>Duplicate Request Cache (v3 path)</li>
         </ul>
       </div>
     </div>
@@ -432,7 +435,9 @@
           <li><b>4.0 base</b> — every RFC 7530 operation has a real handler on the async VFS</li>
           <li><b>4.1 sessions &amp; state</b> — EXCHANGE_ID, CREATE_SESSION, SEQUENCE, RECLAIM_COMPLETE, layout ops</li>
           <li><b>4.2</b> — ALLOCATE, DEALLOCATE, SEEK, intra-server COPY, RFC 8276 xattrs</li>
+          <li><b>Reboot recovery</b> — recovery records and the reply cache persist to the VFS KV store; clients and lock/open state are remembered across a restart, with a real grace window</li>
           <li><b>Delegations</b> — read/write, callback channel, recall timeout (config-gated, default off)</li>
+          <li>OPEN claims incl. CLAIM_DELEG_CUR_FH; BIND_CONN_TO_SESSION</li>
           <li><b>pNFS</b> — MDS + DS, flex-files primary; block &amp; SCSI layout types</li>
           <li>Full <b>NFSv4 ACL</b> model end-to-end</li>
           <li>v4.0 duplicate-request cache keyed by XID</li>
@@ -441,10 +446,9 @@
       <div class="col partial">
         <h4><span class="mark">~</span>Partial</h4>
         <ul>
-          <li><b>Reboot recovery</b>: grace/recovery framework exists but persist hooks are stubs — clients and state are <b>not remembered across a restart</b></li>
           <li>SET_SSV accepts but returns an empty digest (SSV-secured RPC not wired)</li>
           <li>SECINFO_NO_NAME returns a single hardcoded flavor</li>
-          <li>Exclusive-CREATE verifier not persisted</li>
+          <li>pNFS block / SCSI layout types are scaffolded; flex-files is the production path</li>
         </ul>
       </div>
       <div class="col missing">
@@ -452,7 +456,7 @@
         <ul>
           <li><b>RPCSEC_GSS / Kerberos</b> — SECINFO advertises a krb5 OID but the RPC layer only does AUTH_SYS/AUTH_NONE</li>
           <li>4.2: READ_PLUS, CLONE, WRITE_SAME, IO_ADVISE, inter-server COPY</li>
-          <li>BIND_CONN_TO_SESSION, GET_DIR_DELEGATION</li>
+          <li>GET_DIR_DELEGATION</li>
           <li>OPENATTR / named-attribute directories (user xattrs served via 4.2 ops instead)</li>
           <li>CLAIM_DELEGATE_PREV (delegation reclaim after client reboot)</li>
         </ul>
@@ -478,19 +482,21 @@
           <li><b>Auth</b>: NTLM/NTLMSSP, Kerberos (GSSAPI/krb5 + SPNEGO), guest, winbind/AD</li>
           <li><b>Signing</b>: HMAC-SHA256, AES-CMAC, AES-GMAC</li>
           <li><b>Encryption</b>: AES-128/256 CCM &amp; GCM</li>
-          <li>Oplocks &amp; <b>leases</b> (R/RW/RWH) on VFS caching leases</li>
-          <li><b>Multichannel</b> and <b>SMB Direct / RDMA</b> transport</li>
-          <li>Durable &amp; persistent handles; named streams; change-notify (inotify-backed)</li>
+          <li>Oplocks &amp; <b>leases</b> (R/RW/RWH), including <b>SMB3 directory leases</b>, on VFS caching leases</li>
+          <li><b>Per-share encryption enforcement</b> — unencrypted access to an <code>encrypt_data</code> share is refused with ACCESS_DENIED</li>
+          <li><b>SMB3 transport compression</b> — LZ77, LZ77+Huffman, LZNT1, Pattern_V1, applied on the wire</li>
+          <li><b>Copy-offload</b> (ODX OFFLOAD_READ/WRITE, DUPLICATE_EXTENTS), FILE_LEVEL_TRIM, GET/SET_INTEGRITY</li>
+          <li>Multi-element byte-range locks; symlink reparse (STATUS_STOPPED_ON_SYMLINK)</li>
+          <li><b>Multichannel</b> and <b>SMB Direct / RDMA</b> transport; real credit windowing</li>
+          <li>Durable &amp; persistent handles persisted to the backend atomic KV store; change-notify (VFS-notify backed)</li>
           <li>Security descriptors / ACLs with NT↔VFS mapping; rich FSCTL set</li>
         </ul>
       </div>
       <div class="col partial">
         <h4><span class="mark">~</span>Partial</h4>
         <ul>
-          <li><b>SMB Direct / RDMA</b>: SMB 3.0 framing only — the 3.1.1 transform (encrypted) variant is not yet wired</li>
-          <li>Durable handles: in-memory registry; cross-restart depends on record/recover, not a full store</li>
-          <li>Credits granted simplistically (no real windowing)</li>
-          <li>Byte-range locks work, but multi-lock requests (LockCount &gt; 1) rejected</li>
+          <li><b>SMB Direct / RDMA</b>: SMB 3.0 framing only — the 3.1.1 transform (encrypted) variant is not yet wired, so RDMA is unencrypted-only</li>
+          <li><b>Named streams / ADS</b>: full on memfs; passthrough/persistent backends don't yet expose xattr-backed streams</li>
           <li>SACL emitted empty (DACL/owner/group are real)</li>
         </ul>
       </div>
@@ -499,7 +505,6 @@
         <ul>
           <li><b>DFS</b>, Witness protocol</li>
           <li>Extended Attributes (accept-and-ignore)</li>
-          <li>SMB3 compression (context parsed, never applied)</li>
         </ul>
       </div>
     </div>
@@ -519,18 +524,19 @@
         <h4><span class="mark">✓</span>Done</h4>
         <ul>
           <li><b>Object ops</b>: Put, Get (ranged), Head, Delete, batch DeleteObjects, server-side CopyObject</li>
-          <li><b>Multipart</b>: full set — create, upload, complete, abort, list</li>
-          <li><b>Auth</b>: AWS Signature V4 and V2</li>
-          <li>Streaming (aws-chunked) uploads</li>
-          <li>Listing with prefix; keep-alive; structured XML errors</li>
+          <li><b>Multipart</b>: full set — create, upload, complete, abort, list, UploadPartCopy — on every backend</li>
+          <li><b>Bucket ops</b>: dynamic CreateBucket / DeleteBucket / HeadBucket / ListBuckets (backed by a real VFS directory)</li>
+          <li><b>Listing</b>: prefix, delimiter / CommonPrefixes, V1 marker and V2 continuation-token pagination</li>
+          <li><b>Auth</b>: AWS Signature V4 and V2; streaming (aws-chunked) uploads</li>
+          <li>Keep-alive; structured XML errors</li>
         </ul>
       </div>
       <div class="col partial">
         <h4><span class="mark">~</span>Partial</h4>
         <ul>
           <li><b>ETag is not content-MD5</b> (it's a hash of size/mtime/handle) — clients validating ETag==MD5 will mismatch</li>
-          <li>ListObjects incomplete: no pagination / continuation token, no delimiter / CommonPrefixes</li>
-          <li>Multipart &amp; CopyObject disabled on diskfs (backend bug); other backends fine</li>
+          <li>Streaming uploads: chunk framing is decoded but per-chunk chunk-signatures are not verified</li>
+          <li>DeleteBucket is non-recursive — a non-empty bucket returns <code>BucketNotEmpty</code></li>
           <li>Single root credential — key is authenticated but not mapped to a VFS identity (no per-user authz)</li>
           <li>No presigned URLs / anonymous access</li>
         </ul>
@@ -538,11 +544,48 @@
       <div class="col missing">
         <h4><span class="mark">−</span>Missing</h4>
         <ul>
-          <li><b>All bucket-level APIs</b> — buckets exist only as static config</li>
-          <li>Bucket policy / ACL / versioning / lifecycle / CORS / tagging</li>
+          <li><b>Versioning</b> — ListObjectVersions is a <code>null</code>-version stub; no real version history</li>
+          <li>Bucket policy / ACL / lifecycle / CORS / tagging</li>
           <li>Object ACL, tagging, object lock / retention</li>
           <li>Server-side encryption (SSE / SSE-KMS / SSE-C)</li>
           <li>User metadata (<code>x-amz-meta-*</code>); conditional requests</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- REST -->
+  <div class="proto">
+    <div class="proto-head">
+      <div class="l">
+        <span class="name">REST management API</span>
+        <span class="tag">HTTP/HTTPS admin · OpenAPI 3.0 + Swagger UI</span>
+      </div>
+      <span class="badge partial" style="background:color-mix(in oklab, var(--warn) 14%, var(--bg));color:var(--warn)"><span class="led" style="width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--warn)"></span>Early v1</span>
+    </div>
+    <div class="cols3">
+      <div class="col done">
+        <h4><span class="mark">✓</span>Done</h4>
+        <ul>
+          <li>Runtime CRUD for NFS exports, SMB shares, S3 buckets, VFS mounts, and local users</li>
+          <li><code>GET /version</code>, read-only <code>GET /api/v1/config</code></li>
+          <li><b>Auth</b>: JWT Bearer (HS256) and HTTP Basic (<code>crypt</code> + optional winbind/AD)</li>
+          <li>HTTP and HTTPS/TLS via libevpl; bundled Swagger UI + OpenAPI spec</li>
+        </ul>
+      </div>
+      <div class="col partial">
+        <h4><span class="mark">~</span>Partial</h4>
+        <ul>
+          <li>Mutations are <b>in-memory</b> — not written back to config, lost on restart</li>
+          <li>No update/patch verbs (create + delete only)</li>
+          <li>JWT signing secret is generated per process; tokens don't survive a restart</li>
+        </ul>
+      </div>
+      <div class="col missing">
+        <h4><span class="mark">−</span>Missing</h4>
+        <ul>
+          <li><b>RBAC</b> — any authenticated user is a full admin</li>
+          <li>Config write-back / persistence of changes</li>
         </ul>
       </div>
     </div>
@@ -562,13 +605,13 @@
   <!-- TESTING -->
   <div class="section-title"><span class="num">§ 05</span> How it's tested</div>
   <p class="section-intro">
-    Chimera registers <b>~11,370 tests</b> via CTest, run in CI on a multi-image, dual-arch
-    (amd64 / arm64), Release + Debug matrix. We use real-Linux-client conformance suites,
-    not just our own unit tests.
+    Chimera registers <b>~9,000 tests per configuration</b> via CTest, run in CI on a
+    multi-image, dual-arch (amd64 / arm64), Release + Debug matrix. We use real-Linux-client
+    conformance suites, not just our own unit tests.
   </p>
   <div class="bignum">
-    <div class="n"><div class="v">~11,370</div><div class="l">tests registered &amp; gated in CI</div></div>
-    <div class="n"><div class="v">67.9%</div><div class="l">of the full external SMB2/3 conformance surface (smbtorture) passes</div></div>
+    <div class="n"><div class="v">~9,000</div><div class="l">tests registered &amp; gated per CI configuration</div></div>
+    <div class="n"><div class="v">80.4%</div><div class="l">of the full external SMB2/3 conformance surface (smbtorture) passes</div></div>
     <div class="n"><div class="v">real clients</div><div class="l">Linux NFS &amp; SMB clients in KVM, plus in-process binding</div></div>
   </div>
 
@@ -576,11 +619,11 @@
     <div class="lab" style="color:var(--accent)">// how to read these numbers</div>
     <p>CI gates on every test it runs, so the honest claim is <b>"everything we wire up
     passes."</b> But two different things are being measured. <b>smbtorture</b>,
-    <b>WPTS</b>, and <b>KVM pNFS</b> register their <em>entire</em> external conformance
-    surface and then explicitly disable what doesn't pass — so their percentages are a true
-    fraction of a real-world surface. Every other suite registers <em>only</em> the cases it expects to
-    pass, so a 100% there means <b>"100% of what we chose to wire up,"</b> not 100% of the
-    protocol. Both are marked below.</p>
+    <b>WPTS</b>, <b>ceph-s3-tests</b>, and <b>KVM pNFS</b> measure against the <em>entire</em>
+    external conformance surface and report a true fraction of it — so their percentages are
+    a real-world read, not self-graded. Every other suite registers <em>only</em> the cases
+    it expects to pass, so a 100% there means <b>"100% of what we chose to wire up,"</b> not
+    100% of the protocol. Both are marked below.</p>
   </div>
 
   <div class="tests">
@@ -592,9 +635,21 @@
     </div>
     <div class="test-row">
       <div class="suite">smbtorture</div>
-      <div class="what">Samba SMB2/3 protocol conformance — the full external surface, with non-passing subtests explicitly disabled per backend.</div>
-      <div class="reg">828</div>
-      <div class="pass meaningful"><b>67.9%</b></div>
+      <div class="what">Samba SMB2/3 protocol conformance — the full external surface (527 subtests), with non-passing subtests explicitly disabled per backend.</div>
+      <div class="reg">527</div>
+      <div class="pass meaningful"><b>80.4%</b></div>
+    </div>
+    <div class="test-row">
+      <div class="suite">WPTS</div>
+      <div class="what">Microsoft MS-SMB2 server conformance (.NET) — the full mapped surface across base, persistent, compression, multichannel, encryption, directory-lease and symlink modes, with feature-N/A and tracked-failing cases disabled. Daemon stays crash-free in every mode.</div>
+      <div class="reg">267</div>
+      <div class="pass meaningful"><b>90.6%</b></div>
+    </div>
+    <div class="test-row">
+      <div class="suite">ceph-s3-tests</div>
+      <div class="what">Ceph/s3-tests S3 compliance — a curated pass-list of the upstream suite (~840 cases). The fraction reflects the object-data-path scope; bucket policy / ACL / versioning cases stay disabled.</div>
+      <div class="reg">214</div>
+      <div class="pass meaningful"><b>~25%</b></div>
     </div>
     <div class="test-row">
       <div class="suite">KVM pNFS</div>
@@ -605,7 +660,13 @@
     <div class="test-row">
       <div class="suite">pynfs</div>
       <div class="what">NFSv4.0 / 4.1 / 4.2 protocol conformance, across every backend and minor version.</div>
-      <div class="reg">6,689</div>
+      <div class="reg">1,383</div>
+      <div class="pass"><b>100%</b><span class="star"> *</span></div>
+    </div>
+    <div class="test-row">
+      <div class="suite">pjdfstest</div>
+      <div class="what">POSIX filesystem semantics — chmod / chown / open / link / rename / symlink / truncate / NFSv4-ACL permissions — ported in-process across every backend and over NFS 3 / 4.x.</div>
+      <div class="reg">2,554</div>
       <div class="pass"><b>100%</b><span class="star"> *</span></div>
     </div>
     <div class="test-row">
@@ -616,8 +677,8 @@
     </div>
     <div class="test-row">
       <div class="suite">posix stress / fsx</div>
-      <div class="what">fsx, fsstress, dirstress, nametest, fstest, rewinddir — in-process.</div>
-      <div class="reg">1,390</div>
+      <div class="what">fsx, fsstress, dirstress, nametest, fstest, rewinddir and per-op POSIX tests — in-process across backends and transports.</div>
+      <div class="reg">1,401</div>
       <div class="pass"><b>100%</b><span class="star"> *</span></div>
     </div>
     <div class="test-row">
@@ -639,10 +700,16 @@
       <div class="pass"><b>100%</b><span class="star"> *</span></div>
     </div>
     <div class="test-row">
-      <div class="suite">WPTS</div>
-      <div class="what">Microsoft MS-SMB2 server conformance (.NET) — the full suite across all 5 capability modes (base, persistent, compression, multichannel, encryption), with feature-N/A and non-passing cases disabled. Daemon stays crash-free in every mode.</div>
-      <div class="reg">267</div>
-      <div class="pass meaningful"><b>57.3%</b></div>
+      <div class="suite">KVM nfstest</div>
+      <div class="what">NSFTest posix / interop / alloc / sparse / lock / dio / xattr / SSC over a real Linux client, plus a two-client cross-client delegation harness.</div>
+      <div class="reg">~52</div>
+      <div class="pass"><b>100%</b><span class="star"> *</span></div>
+    </div>
+    <div class="test-row">
+      <div class="suite">KVM LTP</div>
+      <div class="what">Linux Test Project — dio, fcntl-locktests, and NFSv4.2 syscall groups over a real Linux client mount.</div>
+      <div class="reg">~39</div>
+      <div class="pass"><b>100%</b><span class="star"> *</span></div>
     </div>
     <div class="test-row">
       <div class="suite">S3 (boto3)</div>
@@ -652,25 +719,26 @@
     </div>
     <div class="test-row">
       <div class="suite">unit + submodule</div>
-      <div class="what">VFS, client, server internals, plus libevpl / xdrzcc / prometheus-c dependency suites.</div>
-      <div class="reg">~278</div>
+      <div class="what">VFS, client library, server internals (incl. REST auth), plus libevpl / xdrzcc / prometheus-c / ndrzcc dependency suites.</div>
+      <div class="reg">~300</div>
       <div class="pass"><b>100%</b></div>
     </div>
   </div>
   <p class="ghnote">
     <span class="star" style="color:var(--muted)">*</span> 100% <b style="color:var(--fg-soft);font-weight:500">by construction</b> — only
     expected-pass cases are registered, so this reflects coverage of what's wired up, not
-    the full protocol surface. A pynfs/s3-tests number comparable to the smbtorture figure
-    would require running the complete upstream suites without curated registration, which
-    CI does not currently encode.
+    the full protocol surface. For S3, the <b style="color:var(--fg-soft);font-weight:500">ceph-s3-tests</b>
+    row gives the full-surface read; an equivalent pynfs figure would require running the
+    complete upstream suite without curated registration, which CI does not currently encode.
   </p>
 
   <div class="section-title" style="margin-top:48px"><span class="num">§ 06</span> smbtorture, by backend</div>
   <p class="section-intro">
-    Because smbtorture measures against the full SMB2/3 surface, it's the clearest read on
-    real conformance. <b>memfs</b> leads with the complete feature set (including named
-    streams); the passthrough backends trail because they can't persist btime / DOS
-    attributes and don't support alternate data streams, so those subtests stay disabled.
+    Because smbtorture measures against the full SMB2/3 surface (527 subtests), it's the
+    clearest read on real conformance. <b>memfs</b> leads with the complete feature set
+    (including named streams); the passthrough backends trail because they can't persist
+    btime / DOS attributes and don't yet expose alternate data streams, so those subtests
+    stay disabled. Enabled counts are per backend, out of 527.
   </p>
   <div class="bd">
     <div class="bd-row head">
@@ -681,51 +749,52 @@
     </div>
     <div class="bd-row">
       <div class="be">memfs</div>
-      <div class="num">109</div>
-      <div class="num">29</div>
-      <div class="pct">79.0%</div>
+      <div class="num">448</div>
+      <div class="num">79</div>
+      <div class="pct">85.0%</div>
     </div>
     <div class="bd-row">
       <div class="be">diskfs <span style="color:var(--muted)">(io_uring / aio)</span></div>
-      <div class="num">101</div>
-      <div class="num">37</div>
-      <div class="pct">73.2%</div>
+      <div class="num">434</div>
+      <div class="num">93</div>
+      <div class="pct">82.4%</div>
     </div>
     <div class="bd-row">
       <div class="be">cairn</div>
-      <div class="num">99</div>
-      <div class="num">39</div>
-      <div class="pct">71.7%</div>
+      <div class="num">427</div>
+      <div class="num">100</div>
+      <div class="pct">81.0%</div>
     </div>
     <div class="bd-row">
       <div class="be">linux / io_uring <span style="color:var(--muted)">(passthrough)</span></div>
-      <div class="num">76</div>
-      <div class="num">62</div>
-      <div class="pct">55.1%</div>
+      <div class="num">400</div>
+      <div class="num">127</div>
+      <div class="pct">75.9%</div>
     </div>
     <div class="bd-row total">
-      <div class="be">Overall</div>
-      <div class="num">562</div>
-      <div class="num">266</div>
-      <div class="pct">67.9%</div>
+      <div class="be">Overall <span style="color:var(--muted)">(6 backends)</span></div>
+      <div class="num">2,541</div>
+      <div class="num">621</div>
+      <div class="pct">80.4%</div>
     </div>
   </div>
   <p class="ghnote">
-    A real-Windows-client SMB suite exists on a feature branch but is not yet wired into
-    mainline CI. KVM suites require nested virtualization and run only on KVM-capable
-    runners.
+    The Microsoft Windows Protocol Test Suite (WPTS, MS-SMB2) is now wired into mainline CI
+    against memfs (see §05). KVM suites require nested virtualization and run only on
+    KVM-capable runners.
   </p>
 
   <!-- BOTTOM SUMMARY / CTA -->
   <div class="warning" style="margin-top:48px;border-color:var(--border-strong);background:var(--surface)">
     <div class="lab" style="color:var(--accent)">// the short version</div>
     <p>The data-path and metadata operations across NFSv3, NFSv4, and SMB2/3 are mature and
-    pass real-client conformance suites. The most significant gaps to know about before
-    leaning on Chimera in production: <b>no Kerberos for NFS</b>; <b>NFSv4 reboot-recovery
-    state isn't persisted</b> across a server restart; and the <b>S3 server is
-    object-data-path only</b> — no bucket management, versioning, ACLs, SSE, or conditional
-    requests. Several advanced SMB features (encryption, persistent handles, Kerberos) ship
-    <b>disabled by default</b>.</p>
+    pass real-client conformance suites. NFSv4 reboot-recovery state and SMB durable handles
+    now persist across restarts, and S3 gained dynamic bucket management and full listing.
+    The most significant gaps to know about before leaning on Chimera in production:
+    <b>no Kerberos for NFS</b>; the <b>S3 server has no versioning, ACLs, SSE, or conditional
+    requests</b>, and its access key isn't mapped to a per-user identity; and several
+    advanced SMB / NFSv4 features ship <b>disabled by default</b>. The REST management API is
+    an <b>early v1</b> — functional but in-memory and without RBAC.</p>
   </div>
 
   <p class="ghnote" style="margin-bottom:96px">
