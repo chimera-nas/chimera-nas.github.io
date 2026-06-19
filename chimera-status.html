@@ -256,6 +256,54 @@
   .bd .bd-bar { display: none; }
   .bignum { grid-template-columns: 1fr; }
 }
+
+/* Feature support tables (§03) */
+.supbody { padding: 0; }
+.supgroup { padding: 18px 22px; border-top: 1px solid var(--border); }
+.supgroup:first-child { border-top: 0; }
+.supgroup > h4 {
+  font-family: var(--font-mono); font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.12em; margin: 0 0 12px; display: flex; align-items: baseline; gap: 10px;
+}
+.supgroup > h4.m { color: var(--good); }
+.supgroup > h4.o { color: var(--warn); }
+.supgroup > h4 .cnt { color: var(--muted); font-weight: 400; letter-spacing: 0; text-transform: none; font-size: 11px; }
+ul.sup { list-style: none; margin: 0; padding: 0; }
+ul.sup.cols { columns: 2; column-gap: 34px; }
+ul.sup > li { break-inside: avoid; }
+.sup li {
+  font-family: var(--font-mono); font-size: 12.5px; line-height: 1.5;
+  padding: 4px 0 4px 20px; position: relative; color: var(--fg-soft);
+}
+.sup li::before { position: absolute; left: 2px; top: 4px; font-size: 11px; }
+.sup li.ok { color: var(--fg); }
+.sup li.ok::before { content: "\2713"; color: var(--good); }
+.sup li.no { color: var(--muted); }
+.sup li.no::before { content: "\2013"; color: var(--muted); }
+.sup li ul { list-style: none; margin: 2px 0 2px 14px; padding: 0; }
+.sup li ul li { font-size: 11.5px; padding: 3px 0 3px 18px; }
+.sup li ul li::before { left: 0; top: 3px; }
+
+/* Code coverage (§07) */
+.cov { margin-top: 20px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.cov-row { display: grid; grid-template-columns: 1fr 92px 1fr 66px 70px; border-bottom: 1px solid var(--border); }
+.cov-row:last-child { border-bottom: 0; }
+.cov-row.head { background: var(--surface); font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); }
+.cov-row.total { background: color-mix(in oklab, var(--accent) 7%, var(--bg)); }
+.cov-row > div { padding: 9px 16px; font-family: var(--font-mono); font-size: 12.5px; }
+.cov-row .area { color: var(--fg); }
+.cov-row.total .area { color: var(--accent); }
+.cov-row .num { color: var(--fg-soft); text-align: right; }
+.cov-row .pct { color: var(--fg); text-align: right; }
+.cov-row.total .pct { color: var(--accent); font-weight: 500; }
+.cov-bar { position: relative; height: 14px; align-self: center; background: var(--surface); border: 1px solid var(--border); border-radius: 2px; overflow: hidden; margin: 0 16px; }
+.cov-bar i { position: absolute; left: 0; top: 0; bottom: 0; background: color-mix(in oklab, var(--good) 55%, var(--bg)); }
+
+@media (max-width: 860px) {
+  ul.sup.cols { columns: 1; }
+  .cov-row { grid-template-columns: 1fr 70px 70px; }
+  .cov-row .num, .cov-bar { display: none; }
+}
 </style>
 </head>
 <body>
@@ -366,227 +414,180 @@
   </div>
 
   <!-- PER-PROTOCOL DETAIL -->
-  <div class="section-title"><span class="num">§ 03</span> Feature detail, protocol by protocol</div>
+  <div class="section-title"><span class="num">§ 03</span> Feature support, protocol by protocol</div>
   <p class="section-intro">
-    Each protocol below splits into what's <b style="color:var(--good)">done</b>,
-    what's <b style="color:var(--warn)">partial</b> (works with caveats), and what's
-    <b>missing</b>. This is a summary — for the line-by-line detail and known bugs, the
-    <a href="https://github.com/chimera-nas" style="color:var(--accent);border-bottom:1px dotted var(--accent);text-decoration:none">GitHub issue tracker</a>
-    is the source of truth.
+    Every feature each protocol revision may implement, split into <b>mandatory</b> (required
+    to claim the revision) and <b>optional</b> capabilities. A <b style="color:var(--good)">&#10003;</b>
+    marks what the Chimera server implements today; a dash marks what it does not. Sub-features
+    (cipher suites, layout types, lease bits, &hellip;) are listed under their parent.
   </p>
 
-  <!-- NFSv3 -->
   <div class="proto">
     <div class="proto-head">
-      <div class="l">
-        <span class="name">NFSv3</span>
-        <span class="tag">+ MOUNT v3 + NLM v4 locking</span>
-      </div>
-      <span class="badge mature" style="background:color-mix(in oklab, var(--good) 14%, var(--bg));color:var(--good)"><span class="led" style="width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--good)"></span>Mature</span>
+      <div class="l"><span class="name">NFSv3</span><span class="tag">RFC 1813</span></div>
+      <span class="badge" style="background:color-mix(in oklab, var(--accent) 12%, var(--bg));color:var(--accent);font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.12em;padding:4px 10px;border-radius:2px;">36 / 43 supported</span>
     </div>
-    <div class="cols3">
-      <div class="col done">
-        <h4><span class="mark">✓</span>Done</h4>
-        <ul>
-          <li>All <b>21 procedures</b> implemented, no stubs</li>
-          <li><b>MOUNT v3</b> — MNT, DUMP, UMNT, EXPORT, in-memory mount table</li>
-          <li><b>NLM v4</b> advisory byte-range locking through the unified VFS lease layer, with cross-protocol conflict detection</li>
-          <li><b>NSM / statd</b> (prog 100024) — crash-recovery lock reclaim, with a KV-persisted monitor list and state number</li>
-          <li>NLM lock state <b>persisted per-host</b> across a server restart</li>
-          <li>Write stability &amp; <code>COMMIT</code> with per-instance write verifier</li>
-          <li>Weak cache consistency (wcc) pre/post attrs</li>
-          <li><b>Duplicate Request Cache</b> (v3 path, config-gated)</li>
-          <li>TCP and RPC-over-RDMA transports; built-in portmap / rpcbind</li>
-        </ul>
+    <div class="supbody">
+      <div class="supgroup">
+        <h4 class="m">Mandatory <span class="cnt">22 / 22 supported</span></h4>
+        <ul class="sup cols"><li class="ok">NULL</li><li class="ok">GETATTR</li><li class="ok">SETATTR</li><li class="ok">LOOKUP</li><li class="ok">ACCESS</li><li class="ok">READLINK</li><li class="ok">READ</li><li class="ok">WRITE</li><li class="ok">CREATE</li><li class="ok">MKDIR</li><li class="ok">SYMLINK</li><li class="ok">MKNOD</li><li class="ok">REMOVE</li><li class="ok">RMDIR</li><li class="ok">RENAME</li><li class="ok">LINK</li><li class="ok">READDIR</li><li class="ok">READDIRPLUS</li><li class="ok">FSSTAT</li><li class="ok">FSINFO</li><li class="ok">PATHCONF</li><li class="ok">COMMIT</li></ul>
       </div>
-      <div class="col partial">
-        <h4><span class="mark">~</span>Partial</h4>
-        <ul>
-          <li>Blocking locks: cross-protocol conflicts ride the wait path; same-protocol contention returns <code>DENIED</code> (no async GRANTED callback queue)</li>
-          <li>SHARE / UNSHARE (DOS share modes) accepted but not enforced</li>
-          <li>EXPORT access control: advertised to all clients, no per-client restriction</li>
-        </ul>
-      </div>
-      <div class="col missing">
-        <h4><span class="mark">−</span>Missing</h4>
-        <ul>
-          <li><b>RPCSEC_GSS / Kerberos</b> — non-AUTH_SYS flavors fall back to anonymous</li>
-          <li>Per-export <code>root_squash</code> / per-client access control</li>
-          <li>NFSv3 ACL sideband protocol (prog 100227)</li>
-          <li>UDP transport (TCP / RDMA only)</li>
-        </ul>
+      <div class="supgroup">
+        <h4 class="o">Optional <span class="cnt">14 / 21 supported</span></h4>
+        <ul class="sup cols"><li class="ok">MOUNT protocol v3</li><li class="ok">NLM locking</li><li class="ok">NSM status monitor</li><li class="ok">Safe asynchronous writes</li><li class="ok">Weak cache consistency</li><li class="ok">Exclusive create</li><li class="ok">Hard links</li><li class="ok">Symbolic links</li><li class="ok">Special files</li><li class="ok">AUTH_SYS / AUTH_NONE</li><li class="no">RPCSEC_GSS / Kerberos<ul><li class="no">krb5</li><li class="no">krb5i</li><li class="no">krb5p</li></ul></li><li class="ok">Duplicate request cache</li><li class="no">NFSACL sideband</li><li class="no">RQUOTA</li><li class="ok">64-bit sizes &amp; offsets</li><li class="no">UDP transport</li><li class="ok">TCP transport</li><li class="ok">RPC-over-RDMA transport</li></ul>
       </div>
     </div>
   </div>
 
-  <!-- NFSv4 -->
   <div class="proto">
     <div class="proto-head">
-      <div class="l">
-        <span class="name">NFSv4 · 4.1 · 4.2</span>
-        <span class="tag">single COMPOUND handler, minorversion 0–2</span>
-      </div>
-      <span class="badge mature" style="background:color-mix(in oklab, var(--good) 14%, var(--bg));color:var(--good)"><span class="led" style="width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--good)"></span>Mature core</span>
+      <div class="l"><span class="name">NFSv4.0</span><span class="tag">RFC 7530</span></div>
+      <span class="badge" style="background:color-mix(in oklab, var(--accent) 12%, var(--bg));color:var(--accent);font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.12em;padding:4px 10px;border-radius:2px;">19 / 26 supported</span>
     </div>
-    <div class="cols3">
-      <div class="col done">
-        <h4><span class="mark">✓</span>Done</h4>
-        <ul>
-          <li><b>4.0 base</b> — every RFC 7530 operation has a real handler on the async VFS</li>
-          <li><b>4.1 sessions &amp; state</b> — EXCHANGE_ID, CREATE_SESSION, SEQUENCE, RECLAIM_COMPLETE, layout ops</li>
-          <li><b>4.2</b> — ALLOCATE, DEALLOCATE, SEEK, intra-server COPY, RFC 8276 xattrs</li>
-          <li><b>Reboot recovery</b> — recovery records and the reply cache persist to the VFS KV store; clients and lock/open state are remembered across a restart, with a real grace window</li>
-          <li><b>Delegations</b> — read/write, callback channel, recall timeout (config-gated, default off)</li>
-          <li>OPEN claims incl. CLAIM_DELEG_CUR_FH; BIND_CONN_TO_SESSION</li>
-          <li><b>pNFS</b> — MDS + DS, flex-files primary; block &amp; SCSI layout types</li>
-          <li>Full <b>NFSv4 ACL</b> model end-to-end</li>
-          <li>v4.0 duplicate-request cache keyed by XID</li>
-        </ul>
+    <div class="supbody">
+      <div class="supgroup">
+        <h4 class="m">Mandatory <span class="cnt">13 / 17 supported</span></h4>
+        <ul class="sup cols"><li class="ok">COMPOUND / CB_COMPOUND</li><li class="ok">Filehandle operations</li><li class="ok">Stateful OPEN / CLOSE</li><li class="ok">Share reservations</li><li class="ok">Integrated byte-range locking</li><li class="ok">Lease-based state</li><li class="ok">State recovery / grace</li><li class="ok">Required attributes</li><li class="ok">Core data &amp; namespace ops</li><li class="ok">Security negotiation</li><li class="no">RPCSEC_GSS support<ul><li class="no">krb5</li><li class="no">krb5i</li><li class="no">krb5p</li></ul></li><li class="ok">String-based identities</li><li class="ok">UTF-8 names</li><li class="ok">Filehandle volatility</li></ul>
       </div>
-      <div class="col partial">
-        <h4><span class="mark">~</span>Partial</h4>
-        <ul>
-          <li>SET_SSV accepts but returns an empty digest (SSV-secured RPC not wired)</li>
-          <li>SECINFO_NO_NAME returns a single hardcoded flavor</li>
-          <li>pNFS block / SCSI layout types are scaffolded; flex-files is the production path</li>
-        </ul>
-      </div>
-      <div class="col missing">
-        <h4><span class="mark">−</span>Missing</h4>
-        <ul>
-          <li><b>RPCSEC_GSS / Kerberos</b> — SECINFO advertises a krb5 OID but the RPC layer only does AUTH_SYS/AUTH_NONE</li>
-          <li>4.2: READ_PLUS, CLONE, WRITE_SAME, IO_ADVISE, inter-server COPY</li>
-          <li>GET_DIR_DELEGATION</li>
-          <li>OPENATTR / named-attribute directories (user xattrs served via 4.2 ops instead)</li>
-          <li>CLAIM_DELEGATE_PREV (delegation reclaim after client reboot)</li>
-        </ul>
+      <div class="supgroup">
+        <h4 class="o">Optional <span class="cnt">6 / 9 supported</span></h4>
+        <ul class="sup cols"><li class="ok">File delegations<ul><li class="ok">Read delegations</li><li class="ok">Write delegations</li></ul></li><li class="ok">NFSv4 ACLs</li><li class="no">Named attributes</li><li class="no">Migration &amp; replication</li><li class="no">Public filehandle</li><li class="ok">Recommended attributes</li><li class="ok">AUTH_SYS</li></ul>
       </div>
     </div>
   </div>
 
-  <!-- SMB -->
   <div class="proto">
     <div class="proto-head">
-      <div class="l">
-        <span class="name">SMB2 · SMB3</span>
-        <span class="tag">dialects 2.1 – 3.1.1 · all 19 commands</span>
-      </div>
-      <span class="badge broad" style="background:color-mix(in oklab, var(--accent) 14%, var(--bg));color:var(--accent)"><span class="led" style="width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--accent)"></span>Broad coverage</span>
+      <div class="l"><span class="name">NFSv4.1</span><span class="tag">RFC 5661</span></div>
+      <span class="badge" style="background:color-mix(in oklab, var(--accent) 12%, var(--bg));color:var(--accent);font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.12em;padding:4px 10px;border-radius:2px;">15 / 23 supported</span>
     </div>
-    <div class="cols3">
-      <div class="col done">
-        <h4><span class="mark">✓</span>Done</h4>
-        <ul>
-          <li><b>All 19 SMB2 commands</b> with real handlers</li>
-          <li>Dialects 2.1 / 3.0 / 3.0.2 / 3.1.1, with 3.1.1 negotiate contexts (preauth integrity, signing, encryption)</li>
-          <li><b>Auth</b>: NTLM/NTLMSSP, Kerberos (GSSAPI/krb5 + SPNEGO), guest, winbind/AD</li>
-          <li><b>Signing</b>: HMAC-SHA256, AES-CMAC, AES-GMAC</li>
-          <li><b>Encryption</b>: AES-128/256 CCM &amp; GCM</li>
-          <li>Oplocks &amp; <b>leases</b> (R/RW/RWH), including <b>SMB3 directory leases</b>, on VFS caching leases</li>
-          <li><b>Per-share encryption enforcement</b> — unencrypted access to an <code>encrypt_data</code> share is refused with ACCESS_DENIED</li>
-          <li><b>SMB3 transport compression</b> — LZ77, LZ77+Huffman, LZNT1, Pattern_V1, applied on the wire</li>
-          <li><b>Copy-offload</b> (ODX OFFLOAD_READ/WRITE, DUPLICATE_EXTENTS), FILE_LEVEL_TRIM, GET/SET_INTEGRITY</li>
-          <li>Multi-element byte-range locks; symlink reparse (STATUS_STOPPED_ON_SYMLINK)</li>
-          <li><b>Multichannel</b> and <b>SMB Direct / RDMA</b> transport; real credit windowing</li>
-          <li>Durable &amp; persistent handles persisted to the backend atomic KV store; change-notify (VFS-notify backed)</li>
-          <li>Security descriptors / ACLs with NT↔VFS mapping; rich FSCTL set</li>
-        </ul>
+    <div class="supbody">
+      <div class="supgroup">
+        <h4 class="m">Mandatory <span class="cnt">9 / 11 supported</span></h4>
+        <ul class="sup cols"><li class="ok">Sessions</li><li class="ok">Exactly-once semantics</li><li class="ok">Reclaim coordination</li><li class="ok">Stateid management</li><li class="ok">Backchannel over session</li><li class="ok">Nameless security query</li><li class="ok">State protection<ul><li class="ok">SP4_NONE</li><li class="no">SP4_MACH_CRED</li><li class="no">SP4_SSV</li></ul></li><li class="ok">Connection trunking</li></ul>
       </div>
-      <div class="col partial">
-        <h4><span class="mark">~</span>Partial</h4>
-        <ul>
-          <li><b>SMB Direct / RDMA</b>: SMB 3.0 framing only — the 3.1.1 transform (encrypted) variant is not yet wired, so RDMA is unencrypted-only</li>
-          <li><b>Named streams / ADS</b>: full on memfs; passthrough/persistent backends don't yet expose xattr-backed streams</li>
-          <li>SACL emitted empty (DACL/owner/group are real)</li>
-        </ul>
-      </div>
-      <div class="col missing">
-        <h4><span class="mark">−</span>Missing</h4>
-        <ul>
-          <li><b>DFS</b>, Witness protocol</li>
-          <li>Extended Attributes (accept-and-ignore)</li>
-        </ul>
+      <div class="supgroup">
+        <h4 class="o">Optional <span class="cnt">6 / 12 supported</span></h4>
+        <ul class="sup cols"><li class="ok">pNFS (parallel NFS)</li><li class="ok">pNFS layout types<ul><li class="no">File layout</li><li class="ok">Block / volume layout</li><li class="ok">SCSI layout</li><li class="no">Object layout</li></ul></li><li class="ok">Layout recall callbacks</li><li class="no">Directory delegations</li><li class="no">Delegation hints</li><li class="no">SSV state protection</li><li class="no">Lock notification</li><li class="ok">Backchannel control</li></ul>
       </div>
     </div>
   </div>
 
-  <!-- S3 -->
   <div class="proto">
     <div class="proto-head">
-      <div class="l">
-        <span class="name">S3</span>
-        <span class="tag">HTTP-to-VFS bridge · object data path</span>
-      </div>
-      <span class="badge partial" style="background:color-mix(in oklab, var(--warn) 14%, var(--bg));color:var(--warn)"><span class="led" style="width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--warn)"></span>Object path only</span>
+      <div class="l"><span class="name">NFSv4.2</span><span class="tag">RFC 7862</span></div>
+      <span class="badge" style="background:color-mix(in oklab, var(--accent) 12%, var(--bg));color:var(--accent);font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.12em;padding:4px 10px;border-radius:2px;">9 / 18 supported</span>
     </div>
-    <div class="cols3">
-      <div class="col done">
-        <h4><span class="mark">✓</span>Done</h4>
-        <ul>
-          <li><b>Object ops</b>: Put, Get (ranged), Head, Delete, batch DeleteObjects, server-side CopyObject</li>
-          <li><b>Multipart</b>: full set — create, upload, complete, abort, list, UploadPartCopy — on every backend</li>
-          <li><b>Bucket ops</b>: dynamic CreateBucket / DeleteBucket / HeadBucket / ListBuckets (backed by a real VFS directory)</li>
-          <li><b>Listing</b>: prefix, delimiter / CommonPrefixes, V1 marker and V2 continuation-token pagination</li>
-          <li><b>Auth</b>: AWS Signature V4 and V2; streaming (aws-chunked) uploads</li>
-          <li>Keep-alive; structured XML errors</li>
-        </ul>
+    <div class="supbody">
+      <div class="supgroup">
+        <h4 class="m">Mandatory <span class="cnt">1 / 2 supported</span></h4>
+        <ul class="sup cols"><li class="ok">Minor-version negotiation</li><li class="no">change_attr_type</li></ul>
       </div>
-      <div class="col partial">
-        <h4><span class="mark">~</span>Partial</h4>
-        <ul>
-          <li><b>ETag is not content-MD5</b> (it's a hash of size/mtime/handle) — clients validating ETag==MD5 will mismatch</li>
-          <li>Streaming uploads: chunk framing is decoded but per-chunk chunk-signatures are not verified</li>
-          <li>DeleteBucket is non-recursive — a non-empty bucket returns <code>BucketNotEmpty</code></li>
-          <li>Single root credential — key is authenticated but not mapped to a VFS identity (no per-user authz)</li>
-          <li>No presigned URLs / anonymous access</li>
-        </ul>
-      </div>
-      <div class="col missing">
-        <h4><span class="mark">−</span>Missing</h4>
-        <ul>
-          <li><b>Versioning</b> — ListObjectVersions is a <code>null</code>-version stub; no real version history</li>
-          <li>Bucket policy / ACL / lifecycle / CORS / tagging</li>
-          <li>Object ACL, tagging, object lock / retention</li>
-          <li>Server-side encryption (SSE / SSE-KMS / SSE-C)</li>
-          <li>User metadata (<code>x-amz-meta-*</code>); conditional requests</li>
-        </ul>
+      <div class="supgroup">
+        <h4 class="o">Optional <span class="cnt">8 / 16 supported</span></h4>
+        <ul class="sup cols"><li class="ok">Server-side copy<ul><li class="ok">Intra-server copy</li><li class="no">Inter-server copy</li><li class="no">Asynchronous offload</li></ul></li><li class="ok">Sparse files<ul><li class="ok">SEEK</li><li class="no">READ_PLUS</li><li class="ok">DEALLOCATE</li></ul></li><li class="ok">Space reservation</li><li class="no">I/O hints</li><li class="ok">User extended attributes</li><li class="no">Labeled NFS</li><li class="no">File clone / reflink</li><li class="no">Application data blocks</li><li class="ok">Flexible File pNFS layout</li><li class="no">pNFS telemetry</li></ul>
       </div>
     </div>
   </div>
 
-  <!-- REST -->
   <div class="proto">
     <div class="proto-head">
-      <div class="l">
-        <span class="name">REST management API</span>
-        <span class="tag">HTTP/HTTPS admin · OpenAPI 3.0 + Swagger UI</span>
-      </div>
-      <span class="badge partial" style="background:color-mix(in oklab, var(--warn) 14%, var(--bg));color:var(--warn)"><span class="led" style="width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--warn)"></span>Early v1</span>
+      <div class="l"><span class="name">SMB 2.0</span><span class="tag">dialect 0x0202</span></div>
+      <span class="badge" style="background:color-mix(in oklab, var(--accent) 12%, var(--bg));color:var(--accent);font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.12em;padding:4px 10px;border-radius:2px;">20 / 23 supported</span>
     </div>
-    <div class="cols3">
-      <div class="col done">
-        <h4><span class="mark">✓</span>Done</h4>
-        <ul>
-          <li>Runtime CRUD for NFS exports, SMB shares, S3 buckets, VFS mounts, and local users</li>
-          <li><code>GET /version</code>, read-only <code>GET /api/v1/config</code></li>
-          <li><b>Auth</b>: JWT Bearer (HS256) and HTTP Basic (<code>crypt</code> + optional winbind/AD)</li>
-          <li>HTTP and HTTPS/TLS via libevpl; bundled Swagger UI + OpenAPI spec</li>
-        </ul>
+    <div class="supbody">
+      <div class="supgroup">
+        <h4 class="m">Mandatory <span class="cnt">10 / 10 supported</span></h4>
+        <ul class="sup cols"><li class="ok">19-command set</li><li class="ok">Credit-based flow control</li><li class="ok">Compound requests</li><li class="ok">64-bit file IDs</li><li class="ok">Asynchronous responses</li><li class="ok">Message signing</li><li class="ok">SPNEGO authentication<ul><li class="ok">Kerberos</li><li class="ok">NTLMv2 / NTLMSSP</li><li class="ok">Guest / anonymous</li></ul></li></ul>
       </div>
-      <div class="col partial">
-        <h4><span class="mark">~</span>Partial</h4>
-        <ul>
-          <li>Mutations are <b>in-memory</b> — not written back to config, lost on restart</li>
-          <li>No update/patch verbs (create + delete only)</li>
-          <li>JWT signing secret is generated per process; tokens don't survive a restart</li>
-        </ul>
+      <div class="supgroup">
+        <h4 class="o">Optional <span class="cnt">10 / 13 supported</span></h4>
+        <ul class="sup cols"><li class="ok">Durable handles (v1)</li><li class="ok">Oplocks (SMB2 form)<ul><li class="ok">Level II</li><li class="ok">Exclusive</li><li class="ok">Batch</li></ul></li><li class="no">DFS</li><li class="ok">Symlinks / reparse points</li><li class="ok">Alternate data streams</li><li class="no">Extended attributes</li><li class="ok">Security descriptors</li><li class="ok">FSCTL operations</li><li class="no">Quota information</li><li class="ok">Large MTU</li></ul>
       </div>
-      <div class="col missing">
-        <h4><span class="mark">−</span>Missing</h4>
-        <ul>
-          <li><b>RBAC</b> — any authenticated user is a full admin</li>
-          <li>Config write-back / persistence of changes</li>
-        </ul>
+    </div>
+  </div>
+
+  <div class="proto">
+    <div class="proto-head">
+      <div class="l"><span class="name">SMB 2.1</span><span class="tag">dialect 0x0210</span></div>
+      <span class="badge" style="background:color-mix(in oklab, var(--accent) 12%, var(--bg));color:var(--accent);font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.12em;padding:4px 10px;border-radius:2px;">8 / 9 supported</span>
+    </div>
+    <div class="supbody">
+      <div class="supgroup">
+        <h4 class="m">Mandatory <span class="cnt">1 / 1 supported</span></h4>
+        <ul class="sup cols"><li class="ok">Dialect 0x0210 negotiation</li></ul>
+      </div>
+      <div class="supgroup">
+        <h4 class="o">Optional <span class="cnt">7 / 8 supported</span></h4>
+        <ul class="sup cols"><li class="ok">Leasing (v1)<ul><li class="ok">Read caching (R)</li><li class="ok">Write caching (W)</li><li class="ok">Handle caching (H)</li></ul></li><li class="ok">Large MTU</li><li class="ok">Improved durable handles</li><li class="ok">Resilient handles</li><li class="no">BranchCache v2</li></ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="proto">
+    <div class="proto-head">
+      <div class="l"><span class="name">SMB 3.0</span><span class="tag">dialect 0x0300</span></div>
+      <span class="badge" style="background:color-mix(in oklab, var(--accent) 12%, var(--bg));color:var(--accent);font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.12em;padding:4px 10px;border-radius:2px;">11 / 15 supported</span>
+    </div>
+    <div class="supbody">
+      <div class="supgroup">
+        <h4 class="m">Mandatory <span class="cnt">3 / 3 supported</span></h4>
+        <ul class="sup cols"><li class="ok">Dialect 0x0300 negotiation</li><li class="ok">AES-128-CMAC signing</li><li class="ok">Secure dialect negotiation</li></ul>
+      </div>
+      <div class="supgroup">
+        <h4 class="o">Optional <span class="cnt">8 / 12 supported</span></h4>
+        <ul class="sup cols"><li class="ok">Encryption</li><li class="ok">Persistent handles</li><li class="ok">SMB Multichannel</li><li class="ok">SMB Direct (RDMA)</li><li class="no">Continuously-available shares</li><li class="no">Witness protocol</li><li class="ok">Directory leasing</li><li class="no">Remote VSS</li><li class="ok">Offloaded data transfer (ODX)</li><li class="ok">Block cloning</li><li class="ok">Per-share encryption</li><li class="no">App Instance ID</li></ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="proto">
+    <div class="proto-head">
+      <div class="l"><span class="name">SMB 3.0.2</span><span class="tag">dialect 0x0302</span></div>
+      <span class="badge" style="background:color-mix(in oklab, var(--accent) 12%, var(--bg));color:var(--accent);font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.12em;padding:4px 10px;border-radius:2px;">2 / 3 supported</span>
+    </div>
+    <div class="supbody">
+      <div class="supgroup">
+        <h4 class="m">Mandatory <span class="cnt">1 / 1 supported</span></h4>
+        <ul class="sup cols"><li class="ok">Dialect 0x0302 negotiation</li></ul>
+      </div>
+      <div class="supgroup">
+        <h4 class="o">Optional <span class="cnt">1 / 2 supported</span></h4>
+        <ul class="sup cols"><li class="no">RDMA read/write with invalidate</li><li class="ok">Multichannel / failover refinements</li></ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="proto">
+    <div class="proto-head">
+      <div class="l"><span class="name">SMB 3.1.1</span><span class="tag">dialect 0x0311</span></div>
+      <span class="badge" style="background:color-mix(in oklab, var(--accent) 12%, var(--bg));color:var(--accent);font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.12em;padding:4px 10px;border-radius:2px;">16 / 18 supported</span>
+    </div>
+    <div class="supbody">
+      <div class="supgroup">
+        <h4 class="m">Mandatory <span class="cnt">3 / 3 supported</span></h4>
+        <ul class="sup cols"><li class="ok">Dialect 0x0311 negotiation</li><li class="ok">Negotiate contexts</li><li class="ok">Pre-authentication integrity</li></ul>
+      </div>
+      <div class="supgroup">
+        <h4 class="o">Optional <span class="cnt">13 / 15 supported</span></h4>
+        <ul class="sup cols"><li class="ok">Encryption ciphers<ul><li class="ok">AES-128-CCM</li><li class="ok">AES-128-GCM</li><li class="ok">AES-256-CCM</li><li class="ok">AES-256-GCM</li></ul></li><li class="ok">SMB compression<ul><li class="ok">LZ77</li><li class="ok">LZ77 + Huffman</li><li class="ok">LZNT1</li><li class="ok">Pattern_V1</li></ul></li><li class="ok">Signing algorithm negotiation<ul><li class="ok">AES-128-CMAC</li><li class="ok">AES-128-GMAC</li></ul></li><li class="no">Cluster dialect fencing</li><li class="no">RDMA encryption / signing</li></ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="proto">
+    <div class="proto-head">
+      <div class="l"><span class="name">Amazon S3</span><span class="tag">REST / HTTP object storage</span></div>
+      <span class="badge" style="background:color-mix(in oklab, var(--accent) 12%, var(--bg));color:var(--accent);font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.12em;padding:4px 10px;border-radius:2px;">12 / 59 supported</span>
+    </div>
+    <div class="supbody">
+      <div class="supgroup">
+        <h4 class="m">Mandatory <span class="cnt">11 / 15 supported</span></h4>
+        <ul class="sup cols"><li class="ok">Service listing</li><li class="ok">Bucket create / delete</li><li class="ok">Object listing</li><li class="ok">Object CRUD</li><li class="ok">Multipart upload</li><li class="ok">Range reads</li><li class="no">Conditional reads</li><li class="ok">SigV4 authentication</li><li class="ok">SigV2 authentication</li><li class="ok">Streaming uploads</li><li class="no">Anonymous &amp; presigned access</li><li class="ok">Addressing styles</li><li class="no">ETags &amp; integrity</li><li class="no">User &amp; system metadata</li><li class="ok">Structured errors</li></ul>
+      </div>
+      <div class="supgroup">
+        <h4 class="o">Optional <span class="cnt">1 / 44 supported</span></h4>
+        <ul class="sup cols"><li class="no">Directory buckets (S3 Express One Zone)</li><li class="no">Browser POST uploads</li><li class="ok">GetObjectAttributes</li><li class="no">Versioning</li><li class="no">Lifecycle configuration</li><li class="no">Storage classes<ul><li class="no">STANDARD</li><li class="no">STANDARD-IA / One Zone-IA</li><li class="no">Intelligent-Tiering</li><li class="no">Glacier tiers</li></ul></li><li class="no">Server-side encryption<ul><li class="no">SSE-S3</li><li class="no">SSE-KMS</li><li class="no">SSE-C</li></ul></li><li class="no">Object Lock / WORM<ul><li class="no">Governance mode</li><li class="no">Compliance mode</li><li class="no">Legal hold</li></ul></li><li class="no">Tagging</li><li class="no">Bucket policies</li><li class="no">ACLs &amp; Object Ownership</li><li class="no">Conditional writes</li><li class="no">CORS</li><li class="no">Replication<ul><li class="no">Cross-region (CRR)</li><li class="no">Same-region (SRR)</li><li class="no">Replication Time Control</li></ul></li><li class="no">Event notifications</li><li class="no">Static website hosting</li><li class="no">Requester Pays</li><li class="no">Public Access Block</li><li class="no">Additional checksums<ul><li class="no">CRC32 / CRC32C</li><li class="no">CRC64NVME</li><li class="no">SHA-1 / SHA-256</li></ul></li><li class="no">S3 Select</li><li class="no">Inventory / analytics / metrics</li><li class="no">Access Points</li><li class="no">S3 Object Lambda</li><li class="no">S3 Access Grants</li><li class="no">Batch Operations</li><li class="no">Transfer Acceleration</li><li class="no">Server access logging</li><li class="no">Glacier restore</li></ul>
       </div>
     </div>
   </div>
@@ -782,6 +783,51 @@
     The Microsoft Windows Protocol Test Suite (WPTS, MS-SMB2) is now wired into mainline CI
     against memfs (see §05). KVM suites require nested virtualization and run only on
     KVM-capable runners.
+  </p>
+
+  <!-- CODE COVERAGE -->
+  <div class="section-title" style="margin-top:48px"><span class="num">§ 07</span> Code coverage</div>
+  <p class="section-intro">
+    Line, function, and branch coverage measured by the CI coverage build across the whole
+    tree (generated XDR / RPC marshalling stubs excluded).
+  </p>
+  <div class="bignum">
+    <div class="n"><div class="v">73.0%</div><div class="l">line coverage &mdash; 94,051 / 128,925 lines</div></div>
+    <div class="n"><div class="v">85.9%</div><div class="l">function coverage &mdash; 4,393 / 5,115 functions</div></div>
+    <div class="n"><div class="v">58.3%</div><div class="l">branch coverage &mdash; 32,314 / 55,412 branches</div></div>
+  </div>
+  <div class="cov">
+    <div class="cov-row head"><div class="area">Area</div><div class="num">Lines</div><div></div><div class="pct">Line&nbsp;%</div><div class="pct">Func&nbsp;%</div></div>
+    <div class="cov-row"><div class="area">src/server/smb</div><div class="num">23,619</div><div class="cov-bar"><i style="width:73.6%"></i></div><div class="pct">73.6%</div><div class="pct">90.9%</div></div>
+    <div class="cov-row"><div class="area">src/posix</div><div class="num">21,372</div><div class="cov-bar"><i style="width:65.5%"></i></div><div class="pct">65.5%</div><div class="pct">89.1%</div></div>
+    <div class="cov-row"><div class="area">src/server/nfs</div><div class="num">19,393</div><div class="cov-bar"><i style="width:74.6%"></i></div><div class="pct">74.6%</div><div class="pct">84.5%</div></div>
+    <div class="cov-row"><div class="area">src/vfs/(core)</div><div class="num">13,538</div><div class="cov-bar"><i style="width:80.6%"></i></div><div class="pct">80.6%</div><div class="pct">95.3%</div></div>
+    <div class="cov-row"><div class="area">src/vfs/diskfs</div><div class="num">11,641</div><div class="cov-bar"><i style="width:81.6%"></i></div><div class="pct">81.6%</div><div class="pct">89.5%</div></div>
+    <div class="cov-row"><div class="area">src/vfs/nfs</div><div class="num">6,823</div><div class="cov-bar"><i style="width:72.6%"></i></div><div class="pct">72.6%</div><div class="pct">90.8%</div></div>
+    <div class="cov-row"><div class="area">src/server/s3</div><div class="num">6,367</div><div class="cov-bar"><i style="width:62.7%"></i></div><div class="pct">62.7%</div><div class="pct">77.9%</div></div>
+    <div class="cov-row"><div class="area">src/vfs/memfs</div><div class="num">3,528</div><div class="cov-bar"><i style="width:79.3%"></i></div><div class="pct">79.3%</div><div class="pct">97.4%</div></div>
+    <div class="cov-row"><div class="area">src/vfs/tests</div><div class="num">3,151</div><div class="cov-bar"><i style="width:99.4%"></i></div><div class="pct">99.4%</div><div class="pct">100.0%</div></div>
+    <div class="cov-row"><div class="area">src/vfs/cairn</div><div class="num">3,151</div><div class="cov-bar"><i style="width:76.3%"></i></div><div class="pct">76.3%</div><div class="pct">84.5%</div></div>
+    <div class="cov-row"><div class="area">src/client</div><div class="num">3,001</div><div class="cov-bar"><i style="width:74.6%"></i></div><div class="pct">74.6%</div><div class="pct">86.5%</div></div>
+    <div class="cov-row"><div class="area">src/common</div><div class="num">2,747</div><div class="cov-bar"><i style="width:54.3%"></i></div><div class="pct">54.3%</div><div class="pct">84.7%</div></div>
+    <div class="cov-row"><div class="area">src/server/rest</div><div class="num">2,034</div><div class="cov-bar"><i style="width:53.6%"></i></div><div class="pct">53.6%</div><div class="pct">62.4%</div></div>
+    <div class="cov-row"><div class="area">src/vfs/io_uring</div><div class="num">1,689</div><div class="cov-bar"><i style="width:84.8%"></i></div><div class="pct">84.8%</div><div class="pct">100.0%</div></div>
+    <div class="cov-row"><div class="area">src/vfs/linux</div><div class="num">1,658</div><div class="cov-bar"><i style="width:78.8%"></i></div><div class="pct">78.8%</div><div class="pct">95.9%</div></div>
+    <div class="cov-row"><div class="area">src/server/server.c</div><div class="num">1,171</div><div class="cov-bar"><i style="width:71.0%"></i></div><div class="pct">71.0%</div><div class="pct">72.5%</div></div>
+    <div class="cov-row"><div class="area">src/daemon</div><div class="num">777</div><div class="cov-bar"><i style="width:60.0%"></i></div><div class="pct">60.0%</div><div class="pct">75.0%</div></div>
+    <div class="cov-row"><div class="area">src/elbencho</div><div class="num">578</div><div class="cov-bar"><i style="width:71.8%"></i></div><div class="pct">71.8%</div><div class="pct">87.5%</div></div>
+    <div class="cov-row"><div class="area">src/fio</div><div class="num">373</div><div class="cov-bar"><i style="width:83.9%"></i></div><div class="pct">83.9%</div><div class="pct">90.0%</div></div>
+    <div class="cov-row"><div class="area">src/vfs/root</div><div class="num">320</div><div class="cov-bar"><i style="width:44.4%"></i></div><div class="pct">44.4%</div><div class="pct">65.0%</div></div>
+    <div class="cov-row"><div class="area">src/vfs/memkv</div><div class="num">279</div><div class="cov-bar"><i style="width:88.9%"></i></div><div class="pct">88.9%</div><div class="pct">100.0%</div></div>
+    <div class="cov-row"><div class="area">src/vfs/sqlite</div><div class="num">233</div><div class="cov-bar"><i style="width:81.5%"></i></div><div class="pct">81.5%</div><div class="pct">100.0%</div></div>
+    <div class="cov-row"><div class="area">src/metrics</div><div class="num">127</div><div class="cov-bar"><i style="width:28.3%"></i></div><div class="pct">28.3%</div><div class="pct">62.5%</div></div>
+    <div class="cov-row total"><div class="area">TOTAL (excl. generated)</div><div class="num">128,925</div><div class="cov-bar"><i style="width:73.0%"></i></div><div class="pct">73.0%</div><div class="pct">85.9%</div></div>
+  </div>
+  <p class="ghnote">
+    Sorted by source size. <b style="color:var(--fg-soft);font-weight:500">src/vfs/tests</b> is the
+    in-tree VFS test harness; protocol servers (<b style="color:var(--fg-soft);font-weight:500">smb</b>,
+    <b style="color:var(--fg-soft);font-weight:500">nfs</b>) and the persistent backend
+    (<b style="color:var(--fg-soft);font-weight:500">diskfs</b>) carry the bulk of the lines.
   </p>
 
   <!-- BOTTOM SUMMARY / CTA -->
