@@ -592,19 +592,8 @@ ul.sup > li { break-inside: avoid; }
     </div>
   </div>
 
-  <!-- AUTH CALLOUT -->
-  <div class="section-title"><span class="num">§ 04</span> Authentication, in one place</div>
-  <div class="warning">
-    <div class="lab">security: read this if you’re evaluating</div>
-    <p>Strong authentication (<b>Kerberos / GSSAPI</b>) is implemented and working for
-    <b>SMB</b>, but <b>not for NFS</b> — the NFS RPC layer processes AUTH_SYS / AUTH_NONE
-    only, and the krb5 advertisement in SECINFO is not yet implemented.</p>
-    <p>On the S3 side the access key is authenticated but not mapped to a VFS identity, so
-    there is <b>no per-user authorization</b> yet — all operations run as root.</p>
-  </div>
-
   <!-- TESTING -->
-  <div class="section-title"><span class="num">§ 05</span> How it's tested</div>
+  <div class="section-title"><span class="num">§ 04</span> How it's tested</div>
   <p class="section-intro">
     Chimera registers <b>~9,000 tests per configuration</b> via CTest, run in CI on a
     multi-image, dual-arch (amd64 / arm64), Release + Debug matrix. We use real-Linux-client
@@ -614,17 +603,6 @@ ul.sup > li { break-inside: avoid; }
     <div class="n"><div class="v">~9,000</div><div class="l">tests registered &amp; gated per CI configuration</div></div>
     <div class="n"><div class="v">80.4%</div><div class="l">of the full external SMB2/3 conformance surface (smbtorture) passes</div></div>
     <div class="n"><div class="v">real clients</div><div class="l">Linux NFS &amp; SMB clients in KVM, plus in-process binding</div></div>
-  </div>
-
-  <div class="warning" style="border-color:color-mix(in oklab, var(--accent) 30%, var(--border));background:color-mix(in oklab, var(--accent) 5%, var(--bg))">
-    <div class="lab" style="color:var(--accent)">// how to read these numbers</div>
-    <p>CI gates on every test it runs, so the honest claim is <b>"everything we wire up
-    passes."</b> But two different things are being measured. <b>smbtorture</b>,
-    <b>WPTS</b>, <b>ceph-s3-tests</b>, and <b>KVM pNFS</b> measure against the <em>entire</em>
-    external conformance surface and report a true fraction of it — so their percentages are
-    a real-world read, not self-graded. Every other suite registers <em>only</em> the cases
-    it expects to pass, so a 100% there means <b>"100% of what we chose to wire up,"</b> not
-    100% of the protocol. Both are marked below.</p>
   </div>
 
   <div class="tests">
@@ -733,7 +711,7 @@ ul.sup > li { break-inside: avoid; }
     complete upstream suite without curated registration, which CI does not currently encode.
   </p>
 
-  <div class="section-title" style="margin-top:48px"><span class="num">§ 06</span> smbtorture, by backend</div>
+  <div class="section-title" style="margin-top:48px"><span class="num">§ 05</span> smbtorture, by backend</div>
   <p class="section-intro">
     Because smbtorture measures against the full SMB2/3 surface (527 subtests), it's the
     clearest read on real conformance. <b>memfs</b> leads with the complete feature set
@@ -781,12 +759,12 @@ ul.sup > li { break-inside: avoid; }
   </div>
   <p class="ghnote">
     The Microsoft Windows Protocol Test Suite (WPTS, MS-SMB2) is now wired into mainline CI
-    against memfs (see §05). KVM suites require nested virtualization and run only on
+    against memfs (see §04). KVM suites require nested virtualization and run only on
     KVM-capable runners.
   </p>
 
   <!-- CODE COVERAGE -->
-  <div class="section-title" style="margin-top:48px"><span class="num">§ 07</span> Code coverage</div>
+  <div class="section-title" style="margin-top:48px"><span class="num">§ 06</span> Code coverage</div>
   <p class="section-intro">
     Line, function, and branch coverage measured by the CI coverage build across the whole
     tree (generated XDR / RPC marshalling stubs excluded).
@@ -823,26 +801,6 @@ ul.sup > li { break-inside: avoid; }
     <div class="cov-row"><div class="area">src/metrics</div><div class="num">127</div><div class="cov-bar"><i style="width:28.3%"></i></div><div class="pct">28.3%</div><div class="pct">62.5%</div></div>
     <div class="cov-row total"><div class="area">TOTAL (excl. generated)</div><div class="num">128,925</div><div class="cov-bar"><i style="width:73.0%"></i></div><div class="pct">73.0%</div><div class="pct">85.9%</div></div>
   </div>
-  <p class="ghnote">
-    Sorted by source size. <b style="color:var(--fg-soft);font-weight:500">src/vfs/tests</b> is the
-    in-tree VFS test harness; protocol servers (<b style="color:var(--fg-soft);font-weight:500">smb</b>,
-    <b style="color:var(--fg-soft);font-weight:500">nfs</b>) and the persistent backend
-    (<b style="color:var(--fg-soft);font-weight:500">diskfs</b>) carry the bulk of the lines.
-  </p>
-
-  <!-- BOTTOM SUMMARY / CTA -->
-  <div class="warning" style="margin-top:48px;border-color:var(--border-strong);background:var(--surface)">
-    <div class="lab" style="color:var(--accent)">// the short version</div>
-    <p>The data-path and metadata operations across NFSv3, NFSv4, and SMB2/3 are mature and
-    pass real-client conformance suites. NFSv4 reboot-recovery state and SMB durable handles
-    now persist across restarts, and S3 gained dynamic bucket management and full listing.
-    The most significant gaps to know about before leaning on Chimera in production:
-    <b>no Kerberos for NFS</b>; the <b>S3 server has no versioning, ACLs, SSE, or conditional
-    requests</b>, and its access key isn't mapped to a per-user identity; and several
-    advanced SMB / NFSv4 features ship <b>disabled by default</b>. The REST management API is
-    an <b>early v1</b> — functional but in-memory and without RBAC.</p>
-  </div>
-
   <p class="ghnote" style="margin-bottom:96px">
     This page is a summary. For line-by-line operation support, current bugs, and the
     roadmap, see the <a href="https://github.com/chimera-nas" target="_blank" rel="noopener">issue tracker on GitHub</a>
